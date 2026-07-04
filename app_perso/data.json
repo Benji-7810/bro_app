@@ -1,0 +1,56 @@
+[
+    {
+        "id": "e8a946b5-0c7f-44e1-a083-f2228c2e684a",
+        "type": "Sport en chambre",
+        "duration": 30,
+        "date": "2026-07-04",
+        "intensity": "Moyenne",
+        "notes": "Séance d'abdos et pompes, bonne énergie !",
+        "created_at": "2026-07-04T18:00:00.000000"
+    },
+    {
+        "id": "d748f3b2-78d1-4475-b6d3-e77a28e3b1ab",
+        "type": "Course à pied",
+        "duration": 45,
+        "date": "2026-07-03",
+        "intensity": "Intense",
+        "notes": "Footing intense, 5.2 km sous la pluie.",
+        "created_at": "2026-07-03T10:30:00.000000"
+    },
+    {
+        "id": "c637e2a1-67c0-4364-a5c2-d66a17d2a09c",
+        "type": "Étirements",
+        "duration": 15,
+        "date": "2026-07-02",
+        "intensity": "Faible",
+        "notes": "Stretching complet du corps pour récupérer.",
+        "created_at": "2026-07-02T21:15:00.000000"
+    },
+    {
+        "id": "b526d1c0-56b9-4253-94b1-c55a06d1a88b",
+        "type": "Sport en chambre",
+        "duration": 40,
+        "date": "2026-07-01",
+        "intensity": "Moyenne",
+        "notes": "Haut du corps : pompes, tractions, gainage.",
+        "created_at": "2026-07-01T17:45:00.000000"
+    },
+    {
+        "id": "a415c0b9-45a8-4142-83a0-b44a95d0a77a",
+        "type": "Étirements",
+        "duration": 20,
+        "date": "2026-06-30",
+        "intensity": "Faible",
+        "notes": "Focus sur les hanches et le bas du dos.",
+        "created_at": "2026-06-30T22:00:00.000000"
+    },
+    {
+        "id": "9304b9a8-3497-4031-729f-a33a84d9a66a",
+        "type": "Course à pied",
+        "duration": 35,
+        "date": "2026-06-28",
+        "intensity": "Moyenne",
+        "notes": "Footing d'endurance fondamentale de 4 km.",
+        "created_at": "2026-06-28T09:15:00.000000"
+    }
+]
