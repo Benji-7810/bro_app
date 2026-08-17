@@ -1,22 +1,41 @@
-// Reveal animation for section content
-const revealElements = document.querySelectorAll('.section-inner');
+// Smooth Section Tracker & Indicator Updates
+const sections = document.querySelectorAll('.page-section');
+const navItems = document.querySelectorAll('.nav-item');
+const dots = document.querySelectorAll('.dot');
 
-const observer = new IntersectionObserver((entries) => {
+const observerOptions = {
+  root: null,
+  threshold: 0.5
+};
+
+const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
+      const currentId = entry.target.getAttribute('id');
+      
+      // Update top navigation active links
+      navItems.forEach(item => {
+        const href = item.getAttribute('href').replace('#', '');
+        if (href === currentId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Update right side indicator dots
+      dots.forEach(dot => {
+        const href = dot.getAttribute('href').replace('#', '');
+        if (href === currentId) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
     }
   });
-}, { threshold: 0.4 });
+}, observerOptions);
 
-revealElements.forEach(el => observer.observe(el));
-
-// Subtle parallax on scroll for hero background (optional)
-window.addEventListener('scroll', () => {
-  const hero = document.querySelector('.hero');
-  if (!hero) return;
-  const y = window.scrollY;
-  if (y < window.innerHeight) {
-    hero.style.opacity = 1 - y / window.innerHeight;
-  }
+sections.forEach(section => {
+  sectionObserver.observe(section);
 });

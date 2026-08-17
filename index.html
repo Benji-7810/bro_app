@@ -1,82 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FORGE — Build your life</title>
+  <title>FORGE — Personal OS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== HERO ===== -->
-  <header class="hero" id="top">
-    <div class="hero-bg"></div>
-    <div class="hero-overlay"></div>
+  <!-- ===== NAVIGATION FIXED ===== -->
+  <nav class="nav">
+    <a href="#hero" class="brand">FORGE</a>
+    <div class="nav-links">
+      <a href="#hero" class="nav-item active">Accueil</a>
+      <a href="#chapters" class="nav-item">Chapitres</a>
+    </div>
+  </nav>
 
-    <nav class="nav">
-      <a href="#top" class="brand">FORGE</a>
-      <div class="nav-links">
-        <a href="#development">Growth</a>
-        <a href="#finance">Finance</a>
-        <a href="#career">Career</a>
+  <!-- ===== INDICATEUR DE PAGE ===== -->
+  <div class="page-indicator">
+    <a href="#hero" class="dot active" data-label="Accueil"></a>
+    <a href="#chapters" class="dot" data-label="Chapitres"></a>
+  </div>
+
+  <!-- PAGE 1: HERO (NOIR, BLANC & ROSE) -->
+  <section class="page-section hero-section" id="hero">
+    <div class="hero-content-clean">
+      <p class="hero-subtag">PERSONAL OPERATING SYSTEM</p>
+      <h1 class="hero-title-white">FORGE</h1>
+      <p class="hero-subtitle-line">DISCIPLINE <span class="dot">•</span> FINANCE <span class="dot">•</span> COMPÉTENCES</p>
+    </div>
+
+    <a href="#chapters" class="scroll-down-hint">
+      <span>SCROLL DOWN</span>
+      <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+    </a>
+  </section>
+
+  <!-- PAGE 2: LES 3 COLONNES VERTICALES PURES AVEC BOUTON ANIMÉ -->
+  <section class="page-section chapters-full-section" id="chapters">
+    
+    <div class="vertical-chapters-container">
+
+      <!-- COLONNE GAUCHE: DEVELOPPEMENT PERSONNEL -->
+      <div class="vertical-col col-left">
+        <div class="col-bg-num">01</div>
+        <div class="col-main-header">
+          <h2 class="col-title">DÉVELOPPEMENT<br>PERSONNEL</h2>
+        </div>
+        <div class="col-footer">
+          <a href="personal.html" class="btn-discover">
+            <span class="btn-text">DÉCOUVRIR</span>
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
       </div>
-    </nav>
 
-    <div class="hero-content">
-      <p class="hero-tag">Personal operating system</p>
-      <h1 class="hero-title">FORGE</h1>
-      <p class="hero-sub">Build the person you're becoming.<br>One discipline, one investment, one step at a time.</p>
-      <a href="#development" class="btn-scroll">Explore <span class="arrow">↓</span></a>
+      <!-- COLONNE MILIEU: FINANCE & PATRIMOINE -->
+      <div class="vertical-col col-center">
+        <div class="col-bg-num">02</div>
+        <div class="col-main-header">
+          <h2 class="col-title">FINANCE &<br>PATRIMOINE</h2>
+        </div>
+        <div class="col-footer">
+          <a href="finance.html" class="btn-discover">
+            <span class="btn-text">DÉCOUVRIR</span>
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- COLONNE DROITE: COMPÉTENCES & CARRIÈRE -->
+      <div class="vertical-col col-right">
+        <div class="col-bg-num">03</div>
+        <div class="col-main-header">
+          <h2 class="col-title">COMPÉTENCES &<br>CARRIÈRE</h2>
+        </div>
+        <div class="col-footer">
+          <a href="career.html" class="btn-discover">
+            <span class="btn-text">DÉCOUVRIR</span>
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
     </div>
 
-    <div class="scroll-hint">Scroll to begin</div>
-  </header>
-
-  <!-- ===== SECTION 1 : PERSONAL DEVELOPMENT ===== -->
-  <a href="personal.html" class="section-card" id="development">
-    <div class="section-bg bg-growth"></div>
-    <div class="section-overlay"></div>
-    <div class="section-num">01</div>
-    <div class="section-inner">
-      <p class="section-label">Chapter 01</p>
-      <h2>Personal<br>Development</h2>
-      <p class="section-desc">Health, sport, habits, mind — the discipline of becoming stronger every day.</p>
-      <span class="enter">Enter →</span>
-    </div>
-  </a>
-
-  <!-- ===== SECTION 2 : FINANCE ===== -->
-  <a href="finance.html" class="section-card" id="finance">
-    <div class="section-bg bg-finance"></div>
-    <div class="section-overlay"></div>
-    <div class="section-num">02</div>
-    <div class="section-inner">
-      <p class="section-label">Chapter 02</p>
-      <h2>Finance</h2>
-      <p class="section-desc">Investments, savings, wealth — mastering your money for the long run.</p>
-      <span class="enter">Enter →</span>
-    </div>
-  </a>
-
-  <!-- ===== SECTION 3 : CAREER ===== -->
-  <a href="career.html" class="section-card" id="career">
-    <div class="section-bg bg-career"></div>
-    <div class="section-overlay"></div>
-    <div class="section-num">03</div>
-    <div class="section-inner">
-      <p class="section-label">Chapter 03</p>
-      <h2>Career</h2>
-      <p class="section-desc">Skills, projects, growth — building the work that defines your path.</p>
-      <span class="enter">Enter →</span>
-    </div>
-  </a>
-
-  <footer class="footer">
-    <span>FORGE™ — your personal system</span>
-  </footer>
+  </section>
 
   <script src="script.js"></script>
 </body>
