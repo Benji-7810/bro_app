@@ -1,0 +1,187 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrimoine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<canvas id="ciel"></canvas>
+<div class="halos"><i class="h1"></i><i class="h2"></i><i class="h3"></i></div>
+
+<div class="app">
+<aside>
+  <div class="marque">
+    <div class="cube"><svg viewBox="0 0 40 40" fill="none">
+      <path d="M20 3 34 11v18L20 37 6 29V11z" stroke="url(#g1)" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M20 3v34M6 11l14 8 14-8M6 29l14-8 14 8" stroke="url(#g1)" stroke-width="1.1" opacity=".55"/>
+      <circle cx="20" cy="20" r="3.6" fill="#22D3EE"/>
+      <defs><linearGradient id="g1" x1="6" y1="37" x2="34" y2="3"><stop stop-color="#22D3EE"/><stop offset="1" stop-color="#FF4FD8"/></linearGradient></defs>
+    </svg></div>
+    <div><b>Patrimoine</b><span>Kélian</span></div>
+  </div>
+
+  <div class="menu" id="menu">
+    <button class="mi" data-v="apercu" aria-current="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 10 4l7 6.5"/><path d="M5 9.5V16h10V9.5"/></svg>Aperçu</button>
+    <button class="mi" data-v="comptes"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="14" height="11" rx="2.5"/><path d="M3 9h14"/></svg>Comptes<small id="n-cpt"></small></button>
+    <button class="mi" data-v="crypto"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M8 7h3.2a2 2 0 0 1 0 4H8m0 0h3.6a2 2 0 0 1 0 4H8m0-8v8"/></svg>Crypto<small id="n-cry"></small></button>
+    <button class="mi" data-v="bourse"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15l4-5 3.5 3L17 5"/><path d="M13 5h4v4"/></svg>ETF<small id="n-etf"></small></button>
+    <button class="mi" data-v="pokemon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6.5" y="2.8" width="9.5" height="13.4" rx="2"/><path d="M4.8 5.2v9.6a2.2 2.2 0 0 0 1.7 2.1"/><path d="M9 8.6h4.5M9 11.4h3"/></svg>Pokémon<small id="n-pok"></small></button>
+    <button class="mi" data-v="montres"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="5"/><path d="M7.6 5.2 8 2.4h4l.4 2.8M7.6 14.8 8 17.6h4l.4-2.8M10 7.6V10l1.6 1.2"/></svg>Montres<small id="n-mon"></small></button>
+    <button class="mi" data-v="sources"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2.5v4M10 13.5v4M2.5 10h4M13.5 10h4"/><circle cx="10" cy="10" r="3"/></svg>Sources</button>
+  </div>
+
+  <div class="side-bas">
+    <div class="jauge"><span>Patrimoine total</span><b class="num" id="j-total">—</b><div class="barre" id="j-barre"></div></div>
+  </div>
+</aside>
+
+<div class="zone">
+  <div class="haut">
+    <h1 id="titre">Aperçu</h1>
+    <span class="etat-flux" id="flux"><i></i><span id="flux-txt">connexion…</span></span>
+    <div class="recherche">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4"/></svg>
+      <input id="q" placeholder="Rechercher" aria-label="Rechercher">
+    </div>
+    <button class="btn" id="sync">Actualiser</button>
+  </div>
+
+  <div class="corps">
+    <!-- ===================== APERÇU ===================== -->
+    <section class="vue on" id="v-apercu">
+      <div class="scene"><div class="verre heros" id="heros">
+        <div class="h-haut">
+          <div>
+            <p class="etiq"><i class="live"></i>Patrimoine total</p>
+            <div class="montant num" id="total">—</div>
+            <div class="gain"><span class="pilule" id="pilule"></span><em id="lib-periode"></em></div>
+          </div>
+          <div class="periodes" id="periodes"></div>
+        </div>
+        <div class="graph" id="zone-g">
+          <svg id="courbe" viewBox="0 0 1000 216" preserveAspectRatio="none" role="img" aria-label="Évolution du patrimoine"></svg>
+          <div class="info" id="info"></div>
+        </div>
+        <div class="echelle"><span id="e-g"></span><span id="e-d">maintenant</span></div>
+      </div></div>
+
+      <div class="duo">
+        <div class="verre pan"><h2>Répartition</h2><p class="sous">Par catégorie d'actifs.</p>
+          <div class="donut"><div class="donut-3d"><svg viewBox="0 0 186 186" id="donut" aria-hidden="true"></svg></div>
+            <div class="dl" id="donut-leg"></div></div></div>
+        <div class="verre pan"><h2>Mouvements marquants</h2><p class="sous">Les lignes qui pèsent sur ta performance.</p>
+          <div id="mouv" style="margin-top:6px"></div></div>
+      </div>
+    </section>
+
+    <!-- ===================== COMPTES ===================== -->
+    <section class="vue" id="v-comptes">
+      <div class="tete"><div><h2>Mes comptes</h2><p class="sous">Clique un compte pour déplier ses lignes.</p></div>
+        <button class="btn btn-2" id="tout-ouvrir">Tout déplier</button></div>
+      <div class="verre pan">
+        <div class="grid-cpt entete">
+          <div>Compte</div><div class="col-cat">Catégorie</div><div class="col-part r">Part</div>
+          <div class="r">Valeur</div><div class="col-pv r">Plus-value</div><div></div>
+        </div>
+        <div id="tb-comptes"></div>
+      </div>
+    </section>
+
+    <!-- ===================== CRYPTO ===================== -->
+    <section class="vue" id="v-crypto">
+      <div class="tete"><div><h2>Crypto</h2><p class="sous">Quantités Kraken, cours CoinGecko rafraîchis en continu.</p></div>
+        <button class="btn" data-collecte="crypto">Rafraîchir</button></div>
+      <div class="grille" id="g-crypto"></div>
+    </section>
+
+    <!-- ===================== ETF ===================== -->
+    <section class="vue" id="v-bourse">
+      <div class="tete"><div><h2>ETF et actions</h2><p class="sous">Yahoo Finance via le backend — cours différés d'environ 15 minutes.</p></div>
+        <button class="btn" data-collecte="bourse">Rafraîchir</button></div>
+      <div class="grille" id="g-etf"></div>
+    </section>
+
+    <!-- ===================== POKÉMON ===================== -->
+    <section class="vue" id="v-pokemon">
+      <div class="tete"><div><h2>Pokémon</h2><p class="sous">Cartes via PokemonTCG.io, scellé via TCG API.</p></div>
+        <button class="btn" data-collecte="cartes">Rafraîchir</button></div>
+      <div class="verre bandeau" id="bandeau-poke"></div>
+
+      <div class="verre api">
+        <div class="onglets" id="ong-rech">
+          <button class="onglet" data-r="cartes" aria-selected="true">Cartes</button>
+          <button class="onglet" data-r="scelle" aria-selected="false">Produits scellés</button>
+        </div>
+        <div class="api-form">
+          <input id="api-q" placeholder="charizard, elite trainer box 151…" aria-label="Recherche">
+          <button class="btn" id="api-go">Chercher</button>
+        </div>
+        <div class="api-etat" id="api-etat"></div>
+        <div class="api-res" id="api-res"></div>
+      </div>
+
+      <div class="tete" style="margin-top:30px"><div><h2>Ma collection</h2></div></div>
+      <div class="gc" id="g-poke"></div>
+    </section>
+
+    <!-- ===================== MONTRES ===================== -->
+    <section class="vue" id="v-montres">
+      <div class="tete"><div><h2>Montres</h2><p class="sous">Suivi manuel — aucune API gratuite ne couvre la cote horlogère.</p></div></div>
+      <div class="verre bandeau" id="bandeau-montres"></div>
+      <div class="gm" id="g-montres" style="margin-bottom:34px"></div>
+      <div class="tete"><div><h2>Catalogue</h2><p class="sous">Ordres de grandeur mi-2026, à corriger à la main.</p></div>
+        <div class="filtres" id="f-marques"></div></div>
+      <div class="gm" id="g-catalogue"></div>
+    </section>
+
+    <!-- ===================== SOURCES ===================== -->
+    <section class="vue" id="v-sources">
+      <div class="tete"><div><h2>Sources de données</h2><p class="sous">État de chaque connecteur et prochaine collecte.</p></div>
+        <button class="btn" data-collecte="tout">Tout collecter</button></div>
+      <div class="src-grille" id="g-sources"></div>
+
+      <div class="verre pan" style="margin-top:22px">
+        <h2>Connecter une banque</h2>
+        <p class="sous" style="margin-bottom:16px">Choisis ton établissement, valide chez lui, reviens ici. Aucun identifiant ne passe par cette page.</p>
+        <div class="api-form">
+          <select id="liste-banques"><option>Chargement…</option></select>
+          <button class="btn" id="go-banque">Obtenir le lien</button>
+        </div>
+        <div class="api-etat" id="etat-banque"></div>
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+
+<!-- ===================== MODALE ===================== -->
+<div class="voile" id="voile">
+  <div class="verre modale" role="dialog" aria-modal="true">
+    <div class="m-haut"><div class="ecu l" id="m-ecu"></div>
+      <div><h3 id="m-nom"></h3><p id="m-sous"></p></div>
+      <button class="m-x" id="m-x" aria-label="Fermer">✕</button></div>
+    <div class="m-visuel" id="m-visuel" hidden></div>
+    <div class="m-g"><svg id="m-courbe" viewBox="0 0 420 96" preserveAspectRatio="none"></svg>
+      <p class="m-legende" id="m-legende"></p></div>
+    <div class="m-ch">
+      <div><label for="m-qte">Quantité</label><input id="m-qte" type="number" step="any" min="0" class="num"></div>
+      <div><label for="m-prix">Prix unitaire €</label><input id="m-prix" type="number" step="any" min="0" class="num"></div>
+    </div>
+    <div class="m-ch">
+      <div><label for="m-inv">Investi €</label><input id="m-inv" type="number" step="any" min="0" class="num"></div>
+      <div><label for="m-code">Code de cours</label><input id="m-code" placeholder="ethereum, PUST.PA, base1-4"></div>
+    </div>
+    <div class="m-ch" id="m-ch-img" hidden>
+      <div style="grid-column:1/-1"><label for="m-img">Image (URL)</label>
+        <input id="m-img" placeholder="https://… photo officielle"></div>
+    </div>
+    <div class="m-pied"><button class="btn btn-2" id="m-sup">Supprimer</button><button class="btn" id="m-ok">Enregistrer</button></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="visuels.js"></script>
+<script src="app.js"></script>
