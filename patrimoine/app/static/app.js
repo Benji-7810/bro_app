@@ -90,7 +90,7 @@ async function rendreHeros(){
   $("#lib-periode").textContent = PERIODES[iPer].lib;
 
   if(h.length < 2){
-    $("#courbe").innerHTML = `<text x="500" y="110" text-anchor="middle" fill="#55697F" font-size="13">
+    $("#courbe").innerHTML = `<text x="500" y="110" text-anchor="middle" fill="#55555F" font-size="13">
       Historique en construction — chaque collecte ajoute un point.</text>`;
     $("#e-g").textContent = ""; window._g = null; return;
   }
@@ -100,16 +100,16 @@ async function rendreHeros(){
   const ombre = vals.map((v,i)=>`${i?"L":"M"}${(X(i)+6).toFixed(1)},${(Y(v)+8).toFixed(1)}`).join(" ");
   $("#courbe").innerHTML = `
     <defs>
-      <linearGradient id="aire" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22D3EE" stop-opacity=".32"/><stop offset="1" stop-color="#22D3EE" stop-opacity="0"/></linearGradient>
-      <linearGradient id="trait" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22D3EE"/><stop offset=".5" stop-color="#8B5CF6"/><stop offset="1" stop-color="#FF4FD8"/></linearGradient>
+      <linearGradient id="aire" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF3B9A" stop-opacity=".32"/><stop offset="1" stop-color="#FF3B9A" stop-opacity="0"/></linearGradient>
+      <linearGradient id="trait" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FF3B9A"/><stop offset=".5" stop-color="#8B5CF6"/><stop offset="1" stop-color="#FF4FD8"/></linearGradient>
       <filter id="neon" x="-20%" y="-40%" width="140%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>
     <path d="${path} L1000,216 L0,216 Z" fill="url(#aire)"/>
     <path d="${ombre}" fill="none" stroke="#000" stroke-width="3" opacity=".35"/>
     <path id="ligne" d="${path}" fill="none" stroke="url(#trait)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" filter="url(#neon)" vector-effect="non-scaling-stroke"/>
-    <line id="vise" y1="0" y2="216" stroke="#22D3EE" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke" opacity="0"/>
-    <circle id="pt" r="5" fill="#03050A" stroke="#22D3EE" stroke-width="2.5" opacity="0"/>
-    <circle cx="1000" cy="${Y(vals[vals.length-1]).toFixed(1)}" r="5" fill="#22D3EE" filter="url(#neon)"/>`;
+    <line id="vise" y1="0" y2="216" stroke="#FF3B9A" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke" opacity="0"/>
+    <circle id="pt" r="5" fill="#000000" stroke="#FF3B9A" stroke-width="2.5" opacity="0"/>
+    <circle cx="1000" cy="${Y(vals[vals.length-1]).toFixed(1)}" r="5" fill="#FF3B9A" filter="url(#neon)"/>`;
   const li = $("#ligne");
   if(li?.getTotalLength && !matchMedia("(prefers-reduced-motion: reduce)").matches){
     const L = li.getTotalLength();
@@ -277,7 +277,7 @@ function rendreSources(){
   const etats = Object.fromEntries((P.sources||[]).map(s=>[s.source,s]));
   $("#g-sources").innerHTML = Object.entries(SOURCES).map(([cle,s])=>{
     const e = etats[cle];
-    const coul = !e ? "#55697F" : e.etat==="ok" ? "#2FE39B" : e.etat==="ignore" ? "#F0C077" : "#FF6B6B";
+    const coul = !e ? "#55555F" : e.etat==="ok" ? "#2FE39B" : e.etat==="ignore" ? "#F0C077" : "#FF6B6B";
     const mot = !e ? "jamais appelée" : e.etat==="ok" ? "opérationnelle" : e.etat==="ignore" ? "clés absentes" : "en erreur";
     return `<div class="src"><h3><i class="pt" style="background:${coul};box-shadow:0 0 10px ${coul}"></i>${s.nom}</h3>
       <p>${s.quoi}</p>

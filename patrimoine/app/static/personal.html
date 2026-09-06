@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Développement Personnel — FORGE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Charge la base JSON même sur protocole file:// sans blocage CORS -->
+  <script src="base/developpement.js"></script>
+
+  <style>
+    body {
+      background-color: #000000;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .personal-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 110px 24px 80px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .personal-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .personal-badge {
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      color: #FF3B9A;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .personal-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      color: #FFFFFF;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .personal-sub {
+      color: #A0A0A8;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 1.15rem;
+    }
+
+    /* ===== FILTRES BARRE ===== */
+    .filters-section {
+      background: #0A0A0E;
+      border: 1px solid rgba(255, 59, 154, 0.25);
+      padding: 20px 24px;
+      border-radius: 4px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: #FF3B9A;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .select-filter {
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 10px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .select-filter:focus, .select-filter:hover {
+      border-color: #FF3B9A;
+    }
+
+    .btn-add-activity {
+      background: transparent;
+      border: 1px solid #FF3B9A;
+      color: #FF3B9A;
+      padding: 12px 24px;
+      font-family: 'Anton', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(255, 59, 154, 0.2);
+    }
+
+    .btn-add-activity:hover {
+      background: #FF3B9A;
+      color: #000000;
+      box-shadow: 0 0 25px rgba(255, 59, 154, 0.6);
+    }
+
+    /* ===== GITHUB HEATMAP GRAPH ===== */
+    .heatmap-card {
+      background: #0A0A0E;
+      border: 1px solid rgba(255, 59, 154, 0.3);
+      padding: 24px;
+      border-radius: 4px;
+      margin-bottom: 36px;
+      position: relative;
+    }
+
+    .heatmap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .heatmap-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.05em;
+      color: #FFFFFF;
+      text-transform: uppercase;
+    }
+
+    .heatmap-total-badge {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: #FF3B9A;
+      background: rgba(255, 59, 154, 0.1);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 59, 154, 0.3);
+    }
+
+    .heatmap-scroll-wrapper {
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .heatmap-container {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 6px;
+      user-select: none;
+      min-width: 720px;
+    }
+
+    .heatmap-months-row {
+      display: flex;
+      font-size: 0.72rem;
+      color: #888894;
+      padding-left: 32px;
+      gap: 36px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .heatmap-body {
+      display: flex;
+      gap: 10px;
+    }
+
+    .heatmap-day-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: #888894;
+      width: 24px;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .heatmap-grid {
+      display: flex;
+      gap: 3px;
+    }
+
+    .heatmap-week {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .heatmap-cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background-color: #121218;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: transform 0.15s ease, filter 0.15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .heatmap-cell:hover {
+      transform: scale(1.3);
+      z-index: 10;
+      border-color: #FFFFFF;
+    }
+
+    .heatmap-cell.level-0 { background-color: #121218; }
+    .heatmap-cell.level-1 { background-color: rgba(255, 59, 154, 0.35); box-shadow: 0 0 4px rgba(255, 59, 154, 0.2); }
+    .heatmap-cell.level-2 { background-color: rgba(255, 59, 154, 0.75); box-shadow: 0 0 8px rgba(255, 59, 154, 0.4); }
+    .heatmap-cell.level-3 { background-color: #FF3B9A; box-shadow: 0 0 12px rgba(255, 59, 154, 0.8); }
+
+    .heatmap-legend {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      font-size: 0.7rem;
+      color: #888894;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .legend-cells {
+      display: flex;
+      gap: 4px;
+    }
+
+    .heatmap-tooltip {
+      position: fixed;
+      background: #181822;
+      border: 1px solid #FF3B9A;
+      color: #FFFFFF;
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      pointer-events: none;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+      white-space: nowrap;
+    }
+
+    /* ===== STATS CARDS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: #0A0A0E;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 20px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: 'Anton', sans-serif;
+      font-size: 2.2rem;
+      color: #FF3B9A;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: #888894;
+      text-transform: uppercase;
+    }
+
+    /* ===== LISTE DES ACTIVITÉS ===== */
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .list-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      color: #FFFFFF;
+      text-transform: uppercase;
+    }
+
+    .activities-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .activity-card {
+      background: #0A0A0E;
+      border: 1px solid rgba(255, 59, 154, 0.2);
+      padding: 20px;
+      border-radius: 4px;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .activity-card:hover {
+      border-color: #FF3B9A;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(255, 59, 154, 0.2);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-emoji {
+      font-size: 2rem;
+      background: rgba(255, 59, 154, 0.1);
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 59, 154, 0.2);
+    }
+
+    .card-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.15rem;
+      color: #FFFFFF;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .card-date {
+      font-size: 0.8rem;
+      color: #888894;
+      margin-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
+    }
+
+    .btn-delete {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: #55555F;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .btn-delete:hover {
+      color: #FF3B9A;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #55555F;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      grid-column: 1 / -1;
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #0D0D12;
+      border: 1px solid #FF3B9A;
+      width: 100%;
+      max-width: 500px;
+      padding: 32px;
+      border-radius: 4px;
+      position: relative;
+      box-shadow: 0 0 40px rgba(255, 59, 154, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.8rem;
+      color: #FFFFFF;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: #A0A0A8;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      color: #FF3B9A;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .sports-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .sport-opt-btn {
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      padding: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sport-opt-btn.selected {
+      border-color: #FF3B9A;
+      background: rgba(255, 59, 154, 0.15);
+      color: #FF3B9A;
+    }
+
+    .date-input {
+      width: 100%;
+      background: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      outline: none;
+    }
+
+    .btn-submit-activity {
+      width: 100%;
+      background: #FF3B9A;
+      border: none;
+      color: #000000;
+      padding: 14px;
+      font-family: 'Anton', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <a href="index.html" class="brand">FORGE</a>
+    <a href="index.html" class="nav-item">← ACCUEIL</a>
+  </nav>
+
+  <!-- Container principal -->
+  <main class="personal-container">
+    <div class="personal-header">
+      <span class="personal-badge">CHAPITRE 01 — ACTIVITÉ & DISCIPLINE (2026)</span>
+      <h1 class="personal-title">DÉVELOPPEMENT PERSONNEL</h1>
+      <p class="personal-sub">Suivi des séances et calendrier de contribution depuis Janvier 2026.</p>
+    </div>
+
+    <!-- FILTRES & BOUTON D'AJOUT -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <span class="filter-label">DISCIPLINE :</span>
+        <select id="filter-discipline" class="select-filter" onchange="applyFilters()">
+          <option value="ALL">Toutes les disciplines (Tout)</option>
+          <option value="Séance de musculation">Séance de musculation 🏋️‍♂️</option>
+          <option value="Piscine">Piscine 🏊‍♂️</option>
+          <option value="Courir">Courir 🏃‍♂️</option>
+          <option value="Étirement">Étirement 🧘‍♂️</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">PÉRIODE :</span>
+        <select id="filter-period" class="select-filter" onchange="applyFilters()">
+          <option value="ALL">Année 2026 entière</option>
+          <option value="01">Janvier 2026</option>
+          <option value="02">Février 2026</option>
+          <option value="03">Mars 2026</option>
+          <option value="04">Avril 2026</option>
+          <option value="05">Mai 2026</option>
+          <option value="06">Juin 2026</option>
+          <option value="07">Juillet 2026</option>
+          <option value="08">Août 2026</option>
+        </select>
+      </div>
+
+      <button class="btn-add-activity" onclick="openModal()">
+        <span>+ AJOUTER UNE ACTIVITÉ</span>
+      </button>
+    </div>
+
+    <!-- CARTE DE STATISTIQUES RECAPITULATIVE -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-lbl">Séances Filtrées</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-muscu">0</div>
+        <div class="stat-lbl">Musculation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-run">0</div>
+        <div class="stat-lbl">Course</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-swim">0</div>
+        <div class="stat-lbl">Piscine</div>
+      </div>
+    </div>
+
+    <!-- GITHUB CONTRIBUTION HEATMAP GRAPH -->
+    <div class="heatmap-card">
+      <div class="heatmap-header">
+        <h3 class="heatmap-title">CALENDRIER D'ACTIVITÉ (GITHUB STYLE 2026)</h3>
+        <span class="heatmap-total-badge" id="heatmap-badge-count">0 activités au total</span>
+      </div>
+
+      <div class="heatmap-scroll-wrapper">
+        <div class="heatmap-container">
+          <div class="heatmap-months-row">
+            <span>Jan</span><span>Fév</span><span>Mar</span><span>Avr</span><span>Mai</span><span>Juin</span><span>Juil</span><span>Août</span>
+          </div>
+          <div class="heatmap-body">
+            <div class="heatmap-day-labels">
+              <span>Lun</span>
+              <span>Mer</span>
+              <span>Ven</span>
+            </div>
+            <div class="heatmap-grid" id="heatmap-grid">
+              <!-- Généré dynamiquement en JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="heatmap-legend">
+        <span>Moins</span>
+        <div class="legend-cells">
+          <div class="heatmap-cell level-0"></div>
+          <div class="heatmap-cell level-1"></div>
+          <div class="heatmap-cell level-2"></div>
+          <div class="heatmap-cell level-3"></div>
+        </div>
+        <span>Plus</span>
+      </div>
+    </div>
+
+    <!-- LISTE DÉTAILLÉE DES SÉANCES FILTRÉES -->
+    <div class="list-header">
+      <h3 class="list-title">HISTORIQUE DES SÉANCES</h3>
+    </div>
+    <div class="activities-list" id="activities-list">
+      <!-- Liste générée en JS -->
+    </div>
+  </main>
+
+  <!-- TOOLTIP HOVER FOR HEATMAP -->
+  <div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+
+  <!-- MODAL AJOUT -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">NOUVELLE ACTIVITÉ</h3>
+        <button class="btn-close-modal" onclick="closeModal()">&times;</button>
+      </div>
+
+      <span class="modal-label">1. DISCIPLINE</span>
+      <div class="sports-options-grid">
+        <button type="button" class="sport-opt-btn" onclick="selectSport('Séance de musculation', '🏋️‍♂️', this)">
+          <span style="font-size:1.8rem">🏋️‍♂️</span>
+          <span style="font-family:'Anton';font-size:0.85rem">Musculation</span>
+        </button>
+
+        <button type="button" class="sport-opt-btn" onclick="selectSport('Piscine', '🏊‍♂️', this)">
+          <span style="font-size:1.8rem">🏊‍♂️</span>
+          <span style="font-family:'Anton';font-size:0.85rem">Piscine</span>
+        </button>
+
+        <button type="button" class="sport-opt-btn" onclick="selectSport('Courir', '🏃‍♂️', this)">
+          <span style="font-size:1.8rem">🏃‍♂️</span>
+          <span style="font-family:'Anton';font-size:0.85rem">Courir</span>
+        </button>
+
+        <button type="button" class="sport-opt-btn" onclick="selectSport('Étirement', '🧘‍♂️', this)">
+          <span style="font-size:1.8rem">🧘‍♂️</span>
+          <span style="font-family:'Anton';font-size:0.85rem">Étirement</span>
+        </button>
+      </div>
+
+      <span class="modal-label">2. DATE</span>
+      <input type="date" id="activity-date" class="date-input">
+
+      <button type="button" class="btn-submit-activity" onclick="saveActivity()">VALIDER & ENREGISTRER</button>
+    </div>
+  </div>
+
+  <script>
+    let baseRawActivities = [];
+    let filteredActivities = [];
+    let selectedSportTitle = null;
+    let selectedSportEmoji = null;
+
+    document.getElementById('activity-date').valueAsDate = new Date();
+
+    // Helper pour nettoyer et comparer les chaînes de texte indépendamment des émojis
+    function cleanStr(str) {
+      if (!str) return '';
+      return str.toLowerCase().replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+    }
+
+    // Charger les données (support 100% universel file:// et http://)
+    async function loadData() {
+      let loaded = [];
+
+      // 1. Priorité au script JS global si disponible (garantit le fonctionnement même en file:// local)
+      if (window.FORGE_BASE_DEVELOPPEMENT && Array.isArray(window.FORGE_BASE_DEVELOPPEMENT)) {
+        loaded = window.FORGE_BASE_DEVELOPPEMENT;
+      } else {
+        try {
+          const response = await fetch('base/developpement.json');
+          if (response.ok) {
+            loaded = await response.json();
+          }
+        } catch (e) {
+          console.warn("Fetch fallback notice:", e);
+        }
+      }
+
+      // 2. Fusionner avec les activités ajoutées localement par l'utilisateur
+      const localAdded = JSON.parse(localStorage.getItem('forge_added_activities') || '[]');
+      baseRawActivities = [...localAdded, ...loaded];
+
+      applyFilters();
+    }
+
+    // Appliquer les filtres de manière souple et réactive
+    function applyFilters() {
+      const disciplineFilter = document.getElementById('filter-discipline').value;
+      const periodFilter = document.getElementById('filter-period').value;
+
+      filteredActivities = baseRawActivities.filter(act => {
+        // Match discipline souple (ignore émojis et majuscules/minuscules)
+        if (disciplineFilter !== 'ALL') {
+          const actClean = cleanStr(act.titre);
+          const filterClean = cleanStr(disciplineFilter);
+          if (!actClean.includes(filterClean) && !filterClean.includes(actClean)) {
+            return false;
+          }
+        }
+
+        // Match période (Mois)
+        if (periodFilter !== 'ALL') {
+          if (!act.date) return false;
+          const monthStr = act.date.split('-')[1];
+          if (monthStr !== periodFilter) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      updateStats();
+      renderHeatmap();
+      renderActivitiesList();
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = filteredActivities.length;
+      document.getElementById('heatmap-badge-count').textContent = `${filteredActivities.length} activités enregistrées`;
+
+      const muscu = filteredActivities.filter(a => cleanStr(a.titre).includes('musculation')).length;
+      const run = filteredActivities.filter(a => cleanStr(a.titre).includes('courir')).length;
+      const swim = filteredActivities.filter(a => cleanStr(a.titre).includes('piscine')).length;
+
+      document.getElementById('stat-muscu').textContent = muscu;
+      document.getElementById('stat-run').textContent = run;
+      document.getElementById('stat-swim').textContent = swim;
+    }
+
+    // Rendu du Graphique GitHub Heatmap
+    function renderHeatmap() {
+      const grid = document.getElementById('heatmap-grid');
+      grid.innerHTML = '';
+
+      const dateMap = {};
+      filteredActivities.forEach(act => {
+        if (!dateMap[act.date]) dateMap[act.date] = [];
+        dateMap[act.date].push(act);
+      });
+
+      const startDate = new Date('2026-01-01');
+      const endDate = new Date('2026-08-31');
+
+      let curr = new Date(startDate);
+      const dayOfWeek = curr.getDay();
+      const offset = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+      curr.setDate(curr.getDate() - offset);
+
+      const tooltip = document.getElementById('heatmap-tooltip');
+
+      while (curr <= endDate) {
+        const weekCol = document.createElement('div');
+        weekCol.className = 'heatmap-week';
+
+        for (let i = 0; i < 7; i++) {
+          const dateISO = curr.toISOString().split('T')[0];
+          const cell = document.createElement('div');
+          cell.className = 'heatmap-cell';
+
+          const dayActs = dateMap[dateISO] || [];
+          const count = dayActs.length;
+
+          if (count === 0) cell.classList.add('level-0');
+          else if (count === 1) cell.classList.add('level-1');
+          else if (count === 2) cell.classList.add('level-2');
+          else cell.classList.add('level-3');
+
+          cell.onmouseenter = (e) => {
+            const formattedDate = formatDateFr(dateISO);
+            let text = `${count} activité(s) le ${formattedDate}`;
+            if (count > 0) {
+              const titles = dayActs.map(a => `${a.emoji || '⚡'} ${a.titre}`).join(', ');
+              text += `<br><span style="color:#FF3B9A">${titles}</span>`;
+            }
+            tooltip.innerHTML = text;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 10) + 'px';
+            tooltip.style.top = (e.clientY - 30) + 'px';
+          };
+
+          cell.onmousemove = (e) => {
+            tooltip.style.left = (e.clientX + 10) + 'px';
+            tooltip.style.top = (e.clientY - 30) + 'px';
+          };
+
+          cell.onmouseleave = () => {
+            tooltip.style.display = 'none';
+          };
+
+          weekCol.appendChild(cell);
+          curr.setDate(curr.getDate() + 1);
+        }
+
+        grid.appendChild(weekCol);
+      }
+    }
+
+    function renderActivitiesList() {
+      const listContainer = document.getElementById('activities-list');
+      
+      if (filteredActivities.length === 0) {
+        listContainer.innerHTML = `
+          <div class="empty-state">
+            Aucune activité ne correspond aux filtres sélectionnés.
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = filteredActivities.slice(0, 60).map(act => `
+        <div class="activity-card">
+          <button class="btn-delete" onclick="deleteActivity(${act.id})" title="Supprimer">&times;</button>
+          <div class="card-top">
+            <div class="card-emoji">${act.emoji || '⚡'}</div>
+            <div class="card-title">${act.titre}</div>
+          </div>
+          <div class="card-date">
+            📅 SÉANCE DU ${formatDateFr(act.date)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openModal() {
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+      resetSelection();
+    }
+
+    function selectSport(title, emoji, element) {
+      selectedSportTitle = title;
+      selectedSportEmoji = emoji;
+      document.querySelectorAll('.sport-opt-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    function resetSelection() {
+      selectedSportTitle = null;
+      selectedSportEmoji = null;
+      document.querySelectorAll('.sport-opt-btn').forEach(btn => btn.classList.remove('selected'));
+    }
+
+    function saveActivity() {
+      if (!selectedSportTitle) {
+        alert('Sélectionnez une discipline.');
+        return;
+      }
+
+      const dateValue = document.getElementById('activity-date').value;
+      if (!dateValue) {
+        alert('Sélectionnez une date.');
+        return;
+      }
+
+      const newAct = {
+        id: Date.now(),
+        titre: selectedSportTitle,
+        emoji: selectedSportEmoji,
+        date: dateValue
+      };
+
+      const localData = JSON.parse(localStorage.getItem('forge_added_activities') || '[]');
+      localData.unshift(newAct);
+      localStorage.setItem('forge_added_activities', JSON.stringify(localData));
+
+      baseRawActivities.unshift(newAct);
+      applyFilters();
+      closeModal();
+    }
+
+    function deleteActivity(id) {
+      baseRawActivities = baseRawActivities.filter(a => a.id !== id);
+      let localData = JSON.parse(localStorage.getItem('forge_added_activities') || '[]');
+      localData = localData.filter(a => a.id !== id);
+      localStorage.setItem('forge_added_activities', JSON.stringify(localData));
+
+      applyFilters();
+    }
+
+    function formatDateFr(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    }
+
+    // Chargement universel des données
+    loadData();
+  </script>
+</body>
+</html>
