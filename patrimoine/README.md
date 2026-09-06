@@ -1,22 +1,40 @@
-# Patrimoine
+# Patrimoine — intégré dans FORGE
 
-Tableau de bord patrimonial personnel. Un backend Python collecte les cours,
-une page servie par le même serveur les affiche. Les clés restent sur ta machine.
+Ce dossier sert **tout le site FORGE** (accueil, chapitres) **et** le tableau
+de bord patrimonial. Un seul backend Python collecte les cours et sert les
+pages : plus de problème de CORS, les clés restent sur ta machine.
 
-## Démarrage
+- `/` — accueil FORGE
+- `/finance.html` — chapitre « Finance & Patrimoine » = le dashboard complet
+- `/personal.html`, `/career.html` — les deux autres chapitres
+
+## Démarrage (une fois le dépôt cloné)
 
 ```bash
 cd patrimoine
-python3 -m venv .venv && source .venv/bin/activate   # Windows : .venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate          # Windows — sous Mac/Linux : source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # puis remplis ce que tu as
+copy env.example.txt .env       # Windows — sous Mac/Linux : cp env.example.txt .env
+```
+
+Puis remplis `.env` avec tes clés (Kraken, GoCardless, etc. — voir plus bas,
+tout est optionnel sauf CoinGecko/Yahoo qui marchent sans clé).
+
+## Lancer le serveur (à chaque fois)
+
+```bash
+cd patrimoine
+.venv\Scripts\activate          # Windows — sous Mac/Linux : source .venv/bin/activate
 uvicorn app.main:app --reload
 ```
 
-Puis http://127.0.0.1:8000
+Puis ouvre **http://127.0.0.1:8000** dans ton navigateur — tu arrives sur
+l'accueil FORGE. Clique « Découvrir » sous « Finance & Patrimoine » pour
+accéder au dashboard. Pour arrêter le serveur : `Ctrl+C` dans le terminal.
 
-Au premier lancement, la base est amorcée avec ton portefeuille actuel
-(39 649,87 € pour 31 963 € investis). Tout est modifiable dans l'interface.
+Au premier lancement, la base est amorcée avec ton portefeuille actuel.
+Tout est modifiable dans l'interface.
 
 ## Ce qui est vraiment en temps réel
 
@@ -85,12 +103,21 @@ est un relevé indicatif mi-2026, à corriger à la main.
 
 ```
 app/
-├── main.py       FastAPI : API + service de la page statique
+├── main.py       FastAPI : API + service de toutes les pages statiques
 ├── db.py         SQLite — comptes, lignes, relevés, journal
 ├── collecte.py   un collecteur par source, tous indépendants
-└── static/       index.html, style.css, app.js, visuels.js
+└── static/
+    ├── index.html, style.css, script.js     accueil FORGE
+    ├── personal.html, career.html           les deux autres chapitres
+    ├── base/                                assets du chapitre "personal"
+    └── finance.html, finance.css,           dashboard patrimoine
+        app.js, visuels.js, retour.html      (chapitre "Finance & Patrimoine")
 data.db           créée au premier lancement
 ```
+
+Le dashboard (`finance.html`/`finance.css`) reprend la palette noir/blanc/rose
+(`#FF3B9A`) du reste de FORGE, tout en gardant ses propres couleurs de
+catégorie (crypto, ETF, Pokémon, montres) et les couleurs hausse/baisse.
 
 Chaque collecte écrit un relevé par ligne. Au bout de quelques jours, les
 courbes ne sont plus des formes générées mais ton historique réel. La base
