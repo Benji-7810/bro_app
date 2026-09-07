@@ -21,7 +21,7 @@ import httpx
 
 from . import db
 
-TIMEOUT = 20.0
+TIMEOUT = 21.0
 
 
 def _env(cle):
