@@ -1,0 +1,7 @@
+data.db
+data.db.bak-*
+cardtrader_blueprints.json
+.env
+__pycache__/
+*.pyc
+.venv/
