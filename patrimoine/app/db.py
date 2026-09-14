@@ -81,10 +81,13 @@ def init():
     with cx() as c:
         # Dédoublonnage avant de poser l'index unique (migration des bases
         # existantes où des points en double se sont glissés).
-        c.execute(
-            """DELETE FROM releves WHERE id NOT IN (
-                 SELECT MIN(id) FROM releves GROUP BY ligne_id, horodate)"""
-        )
+        if c.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='releves'"
+        ).fetchone():
+            c.execute(
+                """DELETE FROM releves WHERE id NOT IN (
+                     SELECT MIN(id) FROM releves GROUP BY ligne_id, horodate)"""
+            )
         c.executescript(SCHEMA)
     if not lister_comptes():
         _amorcer()

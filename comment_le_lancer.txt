@@ -1,0 +1,13 @@
+La commande la plus simple :
+
+cd /.../bro_app.worktrees/code-analysis-launch-tutorial/patrimoine
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+Puis ouvrir :
+
+http://127.0.0.1:8000
+Et si tu veux le lancer sur un autre port :
+
+uvicorn app.main:app --host 127.0.0.1 --port 8001 --reload
