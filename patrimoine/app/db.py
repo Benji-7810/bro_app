@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS lignes (
     image       TEXT,
     style       TEXT,               -- pour les visuels (montres, scellé)
     maj         TEXT,               -- horodatage du dernier cours
-    etat        TEXT DEFAULT 'ok'   -- ok | erreur | manuel
+    etat        TEXT DEFAULT 'ok',  -- ok | erreur | manuel
+    coef        REAL DEFAULT 1      -- état/grading : 1 = cote de marché brute
 );
 
 CREATE TABLE IF NOT EXISTS releves (
@@ -62,6 +63,11 @@ CREATE TABLE IF NOT EXISTS journal (
     etat     TEXT NOT NULL,         -- ok | erreur | ignore
     detail   TEXT
 );
+
+CREATE TABLE IF NOT EXISTS config (
+    cle    TEXT PRIMARY KEY,
+    valeur TEXT
+);
 """
 
 
@@ -80,17 +86,20 @@ def cx():
 def init():
     with cx() as c:
         # Dédoublonnage avant de poser l'index unique (migration des bases
-        # existantes où des points en double se sont glissés).
-        if c.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='releves'"
-        ).fetchone():
+        # existantes où des points en double se sont glissés). Ignoré sur
+        # une base neuve, où la table n'existe pas encore.
+        existe = c.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='releves'"
+        ).fetchone()
+        if existe:
             c.execute(
                 """DELETE FROM releves WHERE id NOT IN (
                      SELECT MIN(id) FROM releves GROUP BY ligne_id, horodate)"""
             )
         c.executescript(SCHEMA)
-    if not lister_comptes():
-        _amorcer()
+        # Bases créées avant le coefficient d'état.
+        if "coef" not in {r["name"] for r in c.execute("PRAGMA table_info(lignes)")}:
+            c.execute("ALTER TABLE lignes ADD COLUMN coef REAL DEFAULT 1")
 
 
 # ------------------------------------------------------------------ lecture
@@ -146,6 +155,21 @@ def historique(heures=8760, points=60):
     return [serie[min(len(serie) - 1, int(i * pas))] for i in range(points)]
 
 
+def config_lire(cle):
+    with cx() as c:
+        r = c.execute("SELECT valeur FROM config WHERE cle = ?", (cle,)).fetchone()
+    return r["valeur"] if r else None
+
+
+def config_ecrire(cle, valeur):
+    with cx() as c:
+        c.execute(
+            """INSERT INTO config (cle, valeur) VALUES (?,?)
+               ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur""",
+            (cle, valeur),
+        )
+
+
 def sante():
     with cx() as c:
         rows = c.execute(
@@ -165,7 +189,13 @@ def maj_ligne(ligne_id, **champs):
 
 
 def maj_cours(ligne_id, prix_unite, quantite=None):
-    champs = {"prix_unite": prix_unite, "maj": datetime.now().isoformat(timespec="seconds"), "etat": "ok"}
+    """`prix_unite` est la cote de marché brute ; le coefficient d'état
+    (carte jouée, carte gradée…) est appliqué ici, pas dans les collecteurs."""
+    with cx() as c:
+        r = c.execute("SELECT coef FROM lignes WHERE id = ?", (ligne_id,)).fetchone()
+    coef = (r["coef"] if r else 1) or 1
+    champs = {"prix_unite": round(prix_unite * coef, 4),
+              "maj": datetime.now().isoformat(timespec="seconds"), "etat": "ok"}
     if quantite is not None:
         champs["quantite"] = quantite
     maj_ligne(ligne_id, **champs)
@@ -184,24 +214,32 @@ def upsert_compte(id, nom, categorie, institution=None, source="manuel", ref_ext
 
 def upsert_ligne(id, compte_id, nom, **champs):
     base = dict(sous_titre=None, quantite=1, prix_unite=0, investi=0,
-                source="manuel", code=None, image=None, style=None, etat="manuel")
+                source="manuel", code=None, image=None, style=None, etat="manuel", coef=1)
     base.update(champs)
     with cx() as c:
         c.execute(
             """INSERT INTO lignes (id, compte_id, nom, sous_titre, quantite, prix_unite,
-                                   investi, source, code, image, style, etat)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                                   investi, source, code, image, style, etat, coef)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                ON CONFLICT(id) DO UPDATE SET nom=excluded.nom, sous_titre=excluded.sous_titre,
                  quantite=excluded.quantite, prix_unite=excluded.prix_unite, investi=excluded.investi,
-                 source=excluded.source, code=excluded.code, image=excluded.image, style=excluded.style""",
+                 source=excluded.source, code=excluded.code, image=excluded.image,
+                 style=excluded.style, coef=excluded.coef""",
             (id, compte_id, nom, base["sous_titre"], base["quantite"], base["prix_unite"],
-             base["investi"], base["source"], base["code"], base["image"], base["style"], base["etat"]),
+             base["investi"], base["source"], base["code"], base["image"], base["style"],
+             base["etat"], base["coef"]),
         )
 
 
 def supprimer_ligne(ligne_id):
     with cx() as c:
         c.execute("DELETE FROM lignes WHERE id = ?", (ligne_id,))
+
+
+def supprimer_compte(compte_id):
+    """Les lignes et leurs relevés partent avec (ON DELETE CASCADE)."""
+    with cx() as c:
+        c.execute("DELETE FROM comptes WHERE id = ?", (compte_id,))
 
 
 def enregistrer_releve():
@@ -237,54 +275,3 @@ def purger(jours=400):
         )
         c.execute("DELETE FROM journal WHERE horodate < ?", (vieux,))
 
-
-# ------------------------------------------------------------------ amorçage
-def _amorcer():
-    """Ton portefeuille actuel, repris des captures Finary.
-    Les quantités crypto et ETF sont calibrées au premier passage
-    des collecteurs, ou remplacées par les vraies via Kraken."""
-    upsert_compte("pea", "PEA Fortuneo", "invest", "Fortuneo", ordre=1)
-    upsert_ligne("l1", "pea", "Amundi PEA Nasdaq-100", sous_titre="FR0011871110",
-                 quantite=1, prix_unite=9669, investi=7768, source="yfinance", code="PUST.PA")
-    upsert_ligne("l2", "pea", "BNP Paribas Easy S&P 500", sous_titre="FR0011550193",
-                 quantite=1, prix_unite=2355, investi=2094, source="yfinance", code="ESE.PA")
-    upsert_ligne("l3", "pea", "Amundi PEA MSCI", sous_titre="FR0013412012",
-                 quantite=1, prix_unite=2418, investi=2510, source="yfinance", code="PAEEM.PA")
-
-    upsert_compte("kraken", "Kraken", "crypto", "Kraken", source="kraken", ordre=2)
-    upsert_ligne("l4", "kraken", "Ethereum", sous_titre="ETH",
-                 quantite=1, prix_unite=7439, investi=4758, source="coingecko", code="ethereum")
-    upsert_ligne("l5", "kraken", "Hyperliquid", sous_titre="HYPE",
-                 quantite=1, prix_unite=2755, investi=2099, source="coingecko", code="hyperliquid")
-    upsert_ligne("l6", "kraken", "Zcash", sous_titre="ZEC",
-                 quantite=1, prix_unite=2463, investi=1000, source="coingecko", code="zcash")
-
-    upsert_compte("av", "Assurance vie", "invest", "LCL", ordre=3)
-    upsert_ligne("l7", "av", "Contrat multisupport", sous_titre="Assurance vie",
-                 quantite=1, prix_unite=5213, investi=3946)
-
-    upsert_compte("cd", "Compte de dépôts", "courant", "LCL", source="gocardless", ordre=4)
-    upsert_ligne("l8", "cd", "Solde courant", sous_titre="Compte à vue",
-                 quantite=1, prix_unite=3706, investi=3706)
-
-    upsert_compte("pee", "Plan d'épargne entreprise", "invest", "Amundi", ordre=5)
-    upsert_ligne("l9", "pee", "PEE Groupe Bouygues", sous_titre="QS0009012087",
-                 quantite=1, prix_unite=2495, investi=2653)
-
-    upsert_compte("poke", "Collection Pokémon", "pokemon", "Suivi manuel", ordre=6)
-    upsert_ligne("l11", "poke", "ECP Sulfura", sous_titre="Coffret",
-                 quantite=1, prix_unite=249.90, investi=160, style="upc")
-    upsert_ligne("l12", "poke", "Demi display Nuit Noire", sous_titre="Display",
-                 quantite=1, prix_unite=120, investi=108, style="display")
-    upsert_ligne("l13", "poke", "Bundle Nuit Noire", sous_titre="Bundle",
-                 quantite=1, prix_unite=41.97, investi=35.94, style="bundle")
-
-    upsert_compte("montres", "Montres", "montre", "Suivi manuel", ordre=7)
-    upsert_ligne("l10", "montres", "Ballade Powermatic 80", sous_titre="Tissot",
-                 quantite=1, prix_unite=625, investi=1025, style="ballade")
-
-    upsert_compte("lj", "Livret jeune", "epargne", "LCL", source="gocardless", ordre=8)
-    upsert_ligne("l14", "lj", "Livret jeune", sous_titre="Épargne réglementée",
-                 quantite=1, prix_unite=100, investi=100)
-
-    enregistrer_releve()

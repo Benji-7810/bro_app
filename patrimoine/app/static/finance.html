@@ -15,6 +15,7 @@
   <div class="f-nav-right">
     <span class="f-crumb">Chapitre 02 — Finance &amp; Patrimoine</span>
     <a href="index.html" class="f-back">← Accueil</a>
+    <button class="f-back" id="deconnexion">Se déconnecter</button>
   </div>
 </header>
 
@@ -87,7 +88,8 @@
     <!-- ===================== COMPTES ===================== -->
     <section class="vue" id="v-comptes">
       <div class="tete"><div><h2>Mes comptes</h2><p class="sous">Clique un compte pour déplier ses lignes.</p></div>
-        <button class="btn btn-2" id="tout-ouvrir">Tout déplier</button></div>
+        <div class="actions"><button class="btn btn-2" id="tout-ouvrir">Tout déplier</button>
+          <button class="btn" data-ajout="libre">Ajouter une ligne</button></div></div>
       <div class="verre pan">
         <div class="grid-cpt entete">
           <div>Compte</div><div class="col-cat">Catégorie</div><div class="col-part r">Part</div>
@@ -95,26 +97,90 @@
         </div>
         <div id="tb-comptes"></div>
       </div>
+
+      <div class="verre pan" style="margin-top:22px">
+        <h2>Créer un compte</h2>
+        <p class="sous" style="margin-bottom:16px">Une enveloppe qui contiendra tes lignes : PEA, compte Kraken, collection, livret…</p>
+        <div class="api-form">
+          <input id="cpt-nom" placeholder="PEA Fortuneo, Kraken, Collection Pokémon…" aria-label="Nom du compte">
+          <select id="cpt-cat" aria-label="Catégorie">
+            <option value="invest">Compte d'investissement</option>
+            <option value="crypto">Crypto</option>
+            <option value="pokemon">Pokémon</option>
+            <option value="montre">Montres</option>
+            <option value="courant">Compte courant</option>
+            <option value="epargne">Compte d'épargne</option>
+          </select>
+          <input id="cpt-inst" placeholder="Institution (optionnel)" aria-label="Institution">
+          <button class="btn" id="cpt-go">Créer</button>
+        </div>
+        <div class="api-etat" id="cpt-etat"></div>
+        <div id="cpt-liste"></div>
+      </div>
     </section>
 
     <!-- ===================== CRYPTO ===================== -->
     <section class="vue" id="v-crypto">
       <div class="tete"><div><h2>Crypto</h2><p class="sous">Quantités Kraken, cours CoinGecko rafraîchis en continu.</p></div>
-        <button class="btn" data-collecte="crypto">Rafraîchir</button></div>
+        <div class="actions"><button class="btn btn-2" data-ajout="crypto">Saisie manuelle</button>
+          <button class="btn" data-collecte="crypto">Rafraîchir</button></div></div>
+
+      <div class="verre api">
+        <p class="sous" style="margin:0 0 14px">Cherche une crypto : le cours se met à jour tout seul ensuite.</p>
+        <div class="api-form">
+          <input id="cry-q" placeholder="bitcoin, ethereum, solana…" aria-label="Rechercher une crypto">
+          <button class="btn" id="cry-go">Chercher</button>
+        </div>
+        <div class="api-etat" id="cry-etat"></div>
+        <div id="cry-res"></div>
+      </div>
+
+      <div class="tete" style="margin-top:30px"><div><h2>Mes cryptos</h2></div></div>
       <div class="grille" id="g-crypto"></div>
     </section>
 
     <!-- ===================== ETF ===================== -->
     <section class="vue" id="v-bourse">
-      <div class="tete"><div><h2>ETF et actions</h2><p class="sous">Yahoo Finance via le backend — cours différés d'environ 15 minutes.</p></div>
-        <button class="btn" data-collecte="bourse">Rafraîchir</button></div>
+      <div class="tete"><div><h2>ETF et actions</h2><p class="sous">Yahoo Finance via le backend — cours différés d'environ 15 minutes, convertis en euros.</p></div>
+        <div class="actions"><button class="btn btn-2" data-ajout="invest">Saisie manuelle</button>
+          <button class="btn" data-collecte="bourse">Rafraîchir</button></div></div>
+
+      <div class="verre api">
+        <div class="onglets" id="ong-etf">
+          <button class="onglet" data-e="catalogue" aria-selected="true">Catalogue</button>
+          <button class="onglet" data-e="recherche" aria-selected="false">Chercher ailleurs</button>
+        </div>
+
+        <div id="etf-catalogue">
+          <div class="api-form">
+            <input id="etf-filtre" placeholder="Filtrer : nom, code, émetteur…" aria-label="Filtrer le catalogue">
+            <label class="case"><input type="checkbox" id="etf-pea"> Éligibles PEA seulement</label>
+          </div>
+          <div class="filtres" id="etf-groupes"></div>
+          <div class="api-etat" id="etf-compte"></div>
+          <div id="etf-liste"></div>
+        </div>
+
+        <div id="etf-recherche" hidden>
+          <p class="sous" style="margin:0 0 14px">Tout ce que Yahoo Finance connaît : ETF, actions, indices.</p>
+          <div class="api-form">
+            <input id="etf-q" placeholder="SPY, CW8.PA, Air Liquide…" aria-label="Rechercher sur Yahoo">
+            <button class="btn" id="etf-go">Chercher</button>
+          </div>
+          <div class="api-etat" id="etf-etat"></div>
+          <div id="etf-res"></div>
+        </div>
+      </div>
+
+      <div class="tete" style="margin-top:30px"><div><h2>Mes lignes</h2></div></div>
       <div class="grille" id="g-etf"></div>
     </section>
 
     <!-- ===================== POKÉMON ===================== -->
     <section class="vue" id="v-pokemon">
       <div class="tete"><div><h2>Pokémon</h2><p class="sous">Cartes via PokemonTCG.io, scellé via TCG API.</p></div>
-        <button class="btn" data-collecte="cartes">Rafraîchir</button></div>
+        <div class="actions"><button class="btn btn-2" data-ajout="pokemon">Saisie manuelle</button>
+          <button class="btn" data-collecte="cartes">Rafraîchir</button></div></div>
       <div class="verre bandeau" id="bandeau-poke"></div>
 
       <div class="verre api">
@@ -130,13 +196,27 @@
         <div class="api-res" id="api-res"></div>
       </div>
 
+      <div class="verre pan" style="margin-top:22px">
+        <h2>Importer depuis iEstims</h2>
+        <p class="sous" style="margin-bottom:16px">Dans l'appli : exporte ton portefeuille, puis dépose ici
+          <code>portefeuille_cartes.csv</code> et <code>portefeuille_items.csv</code> (les deux d'un coup, si tu veux).
+          Les prix d'iEstims tiennent compte de l'état et du grading, donc ils remplacent la cote générique.
+          Réimporter le même fichier met les prix à jour sans créer de doublon.</p>
+        <div class="api-form">
+          <input type="file" id="imp-fichier" accept=".csv,text/csv" multiple aria-label="Fichiers CSV iEstims">
+          <button class="btn" id="imp-go">Importer</button>
+        </div>
+        <div class="api-etat" id="imp-etat"></div>
+      </div>
+
       <div class="tete" style="margin-top:30px"><div><h2>Ma collection</h2></div></div>
       <div class="gc" id="g-poke"></div>
     </section>
 
     <!-- ===================== MONTRES ===================== -->
     <section class="vue" id="v-montres">
-      <div class="tete"><div><h2>Montres</h2><p class="sous">Suivi manuel — aucune API gratuite ne couvre la cote horlogère.</p></div></div>
+      <div class="tete"><div><h2>Montres</h2><p class="sous">Suivi manuel — aucune API gratuite ne couvre la cote horlogère.</p></div>
+        <div class="actions"><button class="btn btn-2" data-ajout="montre">Saisie manuelle</button></div></div>
       <div class="verre bandeau" id="bandeau-montres"></div>
       <div class="gm" id="g-montres" style="margin-bottom:34px"></div>
       <div class="tete"><div><h2>Catalogue</h2><p class="sous">Ordres de grandeur mi-2026, à corriger à la main.</p></div>
@@ -158,6 +238,17 @@
           <button class="btn" id="go-banque">Obtenir le lien</button>
         </div>
         <div class="api-etat" id="etat-banque"></div>
+      </div>
+
+      <div class="verre pan" style="margin-top:22px">
+        <h2>Compte et sécurité</h2>
+        <p class="sous" style="margin-bottom:16px">Connecté en tant que <b id="qui">…</b>. Change ton mot de passe quand tu veux — les sessions ouvertes ailleurs seront déconnectées.</p>
+        <div class="api-form">
+          <input id="mdp-actuel" type="password" autocomplete="current-password" placeholder="Mot de passe actuel">
+          <input id="mdp-nouveau" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe">
+          <button class="btn" id="go-mdp">Changer</button>
+        </div>
+        <div class="api-etat" id="etat-mdp"></div>
       </div>
     </section>
   </div>
@@ -186,6 +277,36 @@
         <input id="m-img" placeholder="https://… photo officielle"></div>
     </div>
     <div class="m-pied"><button class="btn btn-2" id="m-sup">Supprimer</button><button class="btn" id="m-ok">Enregistrer</button></div>
+  </div>
+</div>
+
+<!-- ===================== MODALE D'AJOUT ===================== -->
+<div class="voile" id="voile-ajout">
+  <div class="verre modale" role="dialog" aria-modal="true">
+    <div class="m-haut">
+      <div><h3 id="a-titre">Ajouter une ligne</h3><p id="a-sous"></p></div>
+      <button class="m-x" id="a-x" aria-label="Fermer">✕</button></div>
+
+    <div class="m-ch">
+      <div style="grid-column:1/-1"><label for="a-compte">Compte</label>
+        <select id="a-compte"></select></div>
+    </div>
+    <div class="m-ch">
+      <div><label for="a-nom">Nom</label><input id="a-nom" placeholder="Ethereum, Amundi Nasdaq…"></div>
+      <div><label for="a-sous-titre">Sous-titre</label><input id="a-sous-titre" placeholder="ETH, ISIN, marque…"></div>
+    </div>
+    <div class="m-ch">
+      <div><label for="a-qte">Quantité</label><input id="a-qte" type="number" step="any" min="0" class="num" value="1"></div>
+      <div><label for="a-prix">Prix unitaire €</label><input id="a-prix" type="number" step="any" min="0" class="num" value="0"></div>
+    </div>
+    <div class="m-ch">
+      <div><label for="a-inv">Investi €</label><input id="a-inv" type="number" step="any" min="0" class="num" value="0"></div>
+      <div><label for="a-code">Code de cours</label><input id="a-code" placeholder="ethereum, PUST.PA…"></div>
+    </div>
+    <p class="api-etat" id="a-aide"></p>
+    <p class="api-etat" id="a-etat"></p>
+    <div class="m-pied"><button class="btn btn-2" id="a-annuler">Annuler</button>
+      <button class="btn" id="a-ok">Ajouter</button></div>
   </div>
 </div>
 

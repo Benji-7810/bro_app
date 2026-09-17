@@ -22,7 +22,9 @@ const SOURCES = {
   pokemontcg:{nom:"PokemonTCG.io",quoi:"Images officielles et prix Cardmarket des cartes."},
   tcgapi:{nom:"TCG API",quoi:"Prix des produits scellés, clé gratuite (tcgapi.dev)."},
   pricecharting:{nom:"PriceCharting",quoi:"Alternative scellé, sur abonnement."},
-  gocardless:{nom:"GoCardless",quoi:"Soldes bancaires LCL et Fortuneo, DSP2."}
+  gocardless:{nom:"GoCardless",quoi:"Soldes bancaires LCL et Fortuneo, DSP2."},
+  iestims:{nom:"iEstims",quoi:"Import CSV : prix figés, pour les cartes qu'on n'a pas su lier automatiquement."},
+  tcgdex:{nom:"TCGdex",quoi:"Cotes Cardmarket en euros, catalogue français, sans clé. Rafraîchies toutes les 6 h."}
 };
 
 let P = null, iPer = 6, vue = "apercu", deplies = new Set(["poke"]), q = "";
@@ -46,7 +48,11 @@ function toast(txt, type="ok"){
 }
 async function api(chemin, options){
   const r = await fetch(chemin, options);
-  if(!r.ok) throw new Error((await r.text()).slice(0,120) || r.status);
+  if(r.status === 401){ location.href = "/connexion"; throw new Error("Session expirée"); }
+  if(!r.ok){
+    const corps = await r.json().catch(()=>null);
+    throw new Error(corps?.detail || r.status);
+  }
   return r.json();
 }
 const lignes = () => (P?.comptes||[]).flatMap(c => c.lignes.map(l => ({...l, compte:c})));
@@ -286,7 +292,7 @@ function rendreSources(){
 }
 
 function rendreTout(){
-  rendreHeros(); rendreDonut(); rendreMouv(); rendreComptes();
+  rendreHeros(); rendreDonut(); rendreMouv(); rendreComptes(); rendreListeComptes();
   rendreCrypto(); rendreETF(); rendrePoke(); rendreMontres(); rendreSources();
 }
 
@@ -339,6 +345,39 @@ document.body.addEventListener("click", async e=>{
   if(cat){ await ajouterMontre(cat.dataset.cat); return; }
   const res = e.target.closest("[data-res]");
   if(res){ await ajouterResultat(+res.dataset.res); return; }
+  const aj = e.target.closest("[data-ajout]");
+  if(aj){ ouvrirAjout(aj.dataset.ajout==="libre" ? {} : {categorie:aj.dataset.ajout}); return; }
+  const cry = e.target.closest("[data-cry]");
+  if(cry){
+    const r = cryptoResultats[+cry.dataset.cry];
+    if(r) ouvrirAjout({categorie:"crypto", nom:r.nom, sous_titre:r.symbole,
+                       code:r.id, prix_unite:r.prix||0, source:"coingecko"});
+    return;
+  }
+  const etf = e.target.closest("[data-etf]");
+  if(etf){
+    const x = ETF.find(y=>y.code===etf.dataset.etf);
+    if(x) ouvrirAjout({categorie:"invest", nom:x.nom, sous_titre:x.code,
+                       code:x.code, source:"yfinance"});
+    return;
+  }
+  const etfr = e.target.closest("[data-etfr]");
+  if(etfr){
+    const r = etfResultats[+etfr.dataset.etfr];
+    if(r) ouvrirAjout({categorie:"invest", nom:r.nom, sous_titre:r.symbole,
+                       code:r.symbole, prix_unite:r.prix||0, source:"yfinance"});
+    return;
+  }
+  const sup = e.target.closest("[data-suppr-cpt]");
+  if(sup){
+    const c = P.comptes.find(x=>x.id===sup.dataset.supprCpt);
+    if(!c) return;
+    const n = c.lignes.length;
+    if(!confirm(`Supprimer « ${c.nom} »${n?` et ses ${n} ligne(s)`:""} ? C'est définitif.`)) return;
+    try{ await api(`/api/compte/${c.id}`, {method:"DELETE"}); await recharger(); toast("Compte supprimé"); }
+    catch(err){ toast("Échec : "+err.message, "ko"); }
+    return;
+  }
   const li = e.target.closest("#g-crypto [data-ligne], #g-etf [data-ligne], #g-poke [data-ligne], #g-montres [data-ligne]");
   if(li) ouvrirModale(li.dataset.ligne);
 });
@@ -377,25 +416,229 @@ async function chercher(){
 
 async function ajouterResultat(i){
   const r = derniersResultats[i]; if(!r) return;
-  const compte = P.comptes.find(c=>c.categorie==="pokemon");
-  if(!compte){ toast("Crée d'abord un compte Pokémon", "ko"); return; }
-  await api("/api/ligne", {method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({compte_id:compte.id, nom:r.nom, sous_titre:(r.set||"")+" "+(r.numero||""),
-      quantite:1, prix_unite:r.prix||0, investi:r.prix||0,
-      source: r.source || (modeRech==="cartes"?"pokemontcg":"tcgapi"), code:r.id, image:r.image,
-      style: modeRech==="cartes"?"carte":"upc"})});
-  await recharger(); toast(`${r.nom} ajoutée`);
+  ouvrirAjout({categorie:"pokemon", nom:r.nom, sous_titre:`${r.set||""} ${r.numero||""}`.trim(),
+    prix_unite:r.prix||0, code:r.id, image:r.image,
+    source: r.source || (modeRech==="cartes"?"pokemontcg":"tcgapi"),
+    style: modeRech==="cartes"?"carte":"upc"});
 }
 
 async function ajouterMontre(id){
   const m = CATALOGUE.find(x=>x.id===id); if(!m) return;
-  const compte = P.comptes.find(c=>c.categorie==="montre");
-  if(!compte){ toast("Crée d'abord un compte Montres", "ko"); return; }
-  await api("/api/ligne", {method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({compte_id:compte.id, nom:m.modele, sous_titre:m.marque, quantite:1,
-      prix_unite:Math.round((m.coteMin+m.coteMax)/2), investi:m.neuf, style:m.style, image:m.img||null})});
-  await recharger(); toast(`${m.marque} ${m.modele} ajoutée`);
+  ouvrirAjout({categorie:"montre", nom:m.modele, sous_titre:m.marque,
+    prix_unite:Math.round((m.coteMin+m.coteMax)/2), investi:m.neuf,
+    source:"manuel", style:m.style, image:m.img||null});
 }
+
+/* ------------------------------------------------------------ ajout */
+const NOM_DEFAUT = {invest:"Compte d'investissement", crypto:"Crypto", pokemon:"Collection Pokémon",
+                    montre:"Montres", courant:"Compte courant", epargne:"Épargne"};
+const SOURCE_DEFAUT = {invest:"yfinance", crypto:"coingecko"};
+const AIDE = {
+  coingecko:"Le cours est récupéré automatiquement via CoinGecko. Renseigne surtout la quantité.",
+  yfinance:"Le cours est récupéré via Yahoo Finance et converti en euros. Renseigne la quantité.",
+  pokemontcg:"Le prix Cardmarket est rafraîchi automatiquement toutes les 6 heures.",
+  tcgapi:"Le prix du scellé est rafraîchi automatiquement toutes les 6 heures.",
+  manuel:"Aucun cours automatique pour ce type d'actif : saisis le prix à la main."
+};
+const COLLECTE_POUR = {coingecko:"crypto", yfinance:"bourse", pokemontcg:"cartes", tcgapi:"cartes"};
+let ajoutCtx = null;
+
+async function assurerCompte(categorie){
+  const existant = P.comptes.find(c=>c.categorie===categorie);
+  if(existant) return existant.id;
+  const j = await api("/api/compte", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({nom:NOM_DEFAUT[categorie]||"Compte", categorie})});
+  await recharger();
+  return j.id;
+}
+
+function ouvrirAjout(pre = {}){
+  const cat = pre.categorie || "invest";
+  const source = pre.source || SOURCE_DEFAUT[cat] || "manuel";
+  ajoutCtx = {categorie:cat, source, image:pre.image||null, style:pre.style||null};
+
+  const compat = P.comptes.filter(c=>c.categorie===cat);
+  const autres = P.comptes.filter(c=>c.categorie!==cat);
+  const opt = c => `<option value="${c.id}">${ech(c.nom)}</option>`;
+  $("#a-compte").innerHTML =
+    compat.map(opt).join("")
+    + (autres.length ? `<optgroup label="Autres comptes">${autres.map(opt).join("")}</optgroup>` : "")
+    + `<option value="__nouveau">+ Créer « ${ech(NOM_DEFAUT[cat]||"Compte")} »</option>`;
+  $("#a-compte").value = compat.length ? compat[0].id : "__nouveau";
+
+  $("#a-titre").textContent = pre.nom ? `Ajouter ${pre.nom}` : "Ajouter une ligne";
+  $("#a-sous").textContent = (CAT[cat]||CAT.autre).label;
+  $("#a-nom").value = pre.nom || "";
+  $("#a-sous-titre").value = pre.sous_titre || "";
+  $("#a-qte").value = pre.quantite ?? 1;
+  $("#a-prix").value = pre.prix_unite ?? 0;
+  $("#a-inv").value = pre.investi ?? 0;
+  $("#a-code").value = pre.code || "";
+  $("#a-aide").textContent = AIDE[source] || AIDE.manuel;
+  $("#a-etat").textContent = "";
+  $("#voile-ajout").classList.add("on");
+  $("#a-nom").focus();
+}
+const fermerAjout = ()=>{ $("#voile-ajout").classList.remove("on"); ajoutCtx = null; };
+$("#a-x").addEventListener("click", fermerAjout);
+$("#a-annuler").addEventListener("click", fermerAjout);
+$("#voile-ajout").addEventListener("click", e=>{ if(e.target.id==="voile-ajout") fermerAjout(); });
+
+$("#a-ok").addEventListener("click", async ()=>{
+  const nom = $("#a-nom").value.trim();
+  if(!nom){ $("#a-etat").textContent = "Donne un nom à la ligne."; return; }
+  const b = $("#a-ok"); b.disabled = true; b.textContent = "Ajout…";
+  const ctx = ajoutCtx;
+  try{
+    let compte_id = $("#a-compte").value;
+    if(compte_id === "__nouveau") compte_id = await assurerCompte(ctx.categorie);
+    await api("/api/ligne", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({compte_id, nom, sous_titre:$("#a-sous-titre").value.trim()||null,
+        quantite:+$("#a-qte").value||0, prix_unite:+$("#a-prix").value||0,
+        investi:+$("#a-inv").value||0, source:ctx.source,
+        code:$("#a-code").value.trim()||null, image:ctx.image, style:ctx.style})});
+    fermerAjout();
+    toast(`${nom} ajouté`);
+    const quoi = COLLECTE_POUR[ctx.source];
+    if(quoi){ try{ await api(`/api/collecter?quoi=${quoi}`, {method:"POST"}); }catch(e){} }
+    await recharger();
+  }catch(e){ $("#a-etat").textContent = "Erreur : "+e.message; }
+  b.disabled = false; b.textContent = "Ajouter";
+});
+
+/* ------------------------------------------------------------ recherche crypto */
+let cryptoResultats = [];
+async function chercherCrypto(){
+  const t = $("#cry-q").value.trim();
+  if(!t){ $("#cry-etat").textContent = "Tape un nom."; return; }
+  $("#cry-etat").textContent = "Recherche…"; $("#cry-res").innerHTML = "";
+  try{
+    const j = await api(`/api/recherche/crypto?terme=${encodeURIComponent(t)}`);
+    cryptoResultats = j.resultats || [];
+    if(!cryptoResultats.length){ $("#cry-etat").textContent = "Aucun résultat."; return; }
+    $("#cry-etat").textContent = `${cryptoResultats.length} résultats.`;
+    $("#cry-res").innerHTML = `<div class="liste">` + cryptoResultats.map((r,i)=>`
+      <div class="lr">${r.image?`<img src="${ech(r.image)}" alt="" loading="lazy">`:`<span style="width:26px;flex:none"></span>`}
+        <div class="lr-txt"><b>${ech(r.nom)}</b><span>${ech(r.symbole)} · ${ech(r.id)}</span></div>
+        <div class="lr-prix">${r.prix?eurP(r.prix):"—"}</div>
+        <button class="btn btn-s" data-cry="${i}">Ajouter</button></div>`).join("") + `</div>`;
+  }catch(e){ $("#cry-etat").textContent = "Erreur : "+e.message; }
+}
+$("#cry-go").addEventListener("click", chercherCrypto);
+$("#cry-q").addEventListener("keydown", e=>{ if(e.key==="Enter") chercherCrypto(); });
+
+/* ------------------------------------------------------------ ETF */
+let ETF = [], etfGroupe = "Tous", etfResultats = [];
+
+async function chargerEtf(){
+  try{ ETF = await api("etf.json"); }
+  catch(e){ ETF = []; $("#etf-compte").textContent = "Catalogue indisponible — utilise « Chercher ailleurs »."; return; }
+  rendreEtfGroupes();
+  rendreEtfListe();
+}
+function rendreEtfGroupes(){
+  const g = ["Tous", ...[...new Set(ETF.map(x=>x.groupe))].sort((a,b)=>a.localeCompare(b,"fr"))];
+  $("#etf-groupes").innerHTML = g.map(x=>
+    `<button class="fc" data-eg="${ech(x)}" aria-pressed="${etfGroupe===x}">${ech(x)}</button>`).join("");
+}
+function rendreEtfListe(){
+  const f = $("#etf-filtre").value.trim().toLowerCase();
+  const peaSeul = $("#etf-pea").checked;
+  const liste = ETF.filter(x =>
+    (etfGroupe==="Tous" || x.groupe===etfGroupe) &&
+    (!peaSeul || x.pea) &&
+    (!f || `${x.nom} ${x.code} ${x.groupe}`.toLowerCase().includes(f)));
+  $("#etf-compte").textContent = `${liste.length} ETF sur ${ETF.length}.`;
+  $("#etf-liste").innerHTML = !liste.length
+    ? `<div class="vide">Aucun ETF ne correspond. Essaie « Chercher ailleurs ».</div>`
+    : `<div class="liste">` + liste.map(x=>`
+        <div class="lr"><div class="lr-txt">
+            <b>${ech(x.nom)}${x.pea?`<span class="etiq-pea">PEA</span>`:""}</b>
+            <span>${ech(x.code)} · ${ech(x.groupe)} · ${ech(x.place)} · ${ech(x.devise)}</span></div>
+          <button class="btn btn-s" data-etf="${ech(x.code)}">Ajouter</button></div>`).join("") + `</div>`;
+}
+$("#etf-filtre").addEventListener("input", rendreEtfListe);
+$("#etf-pea").addEventListener("change", rendreEtfListe);
+$("#etf-groupes").addEventListener("click", e=>{
+  const b = e.target.closest("[data-eg]"); if(!b) return;
+  etfGroupe = b.dataset.eg;
+  document.querySelectorAll("#etf-groupes .fc").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  rendreEtfListe();
+});
+$("#ong-etf").addEventListener("click", e=>{
+  const o = e.target.closest(".onglet"); if(!o) return;
+  document.querySelectorAll("#ong-etf .onglet").forEach(x=>x.setAttribute("aria-selected", x===o));
+  $("#etf-catalogue").hidden = o.dataset.e !== "catalogue";
+  $("#etf-recherche").hidden = o.dataset.e !== "recherche";
+});
+
+async function chercherEtf(){
+  const t = $("#etf-q").value.trim();
+  if(!t){ $("#etf-etat").textContent = "Tape un nom ou un code."; return; }
+  $("#etf-etat").textContent = "Recherche…"; $("#etf-res").innerHTML = "";
+  try{
+    const j = await api(`/api/recherche/bourse?terme=${encodeURIComponent(t)}`);
+    etfResultats = j.resultats || [];
+    if(!etfResultats.length){ $("#etf-etat").textContent = "Aucun résultat."; return; }
+    $("#etf-etat").textContent = `${etfResultats.length} résultats — le cours n'est chargé que pour les premiers.`;
+    $("#etf-res").innerHTML = `<div class="liste">` + etfResultats.map((r,i)=>`
+      <div class="lr"><div class="lr-txt"><b>${ech(r.nom)}</b>
+          <span>${ech(r.symbole)} · ${ech(r.genre)} · ${ech(r.place)}</span></div>
+        <div class="lr-prix">${r.prix?eurP(r.prix):"—"}</div>
+        <button class="btn btn-s" data-etfr="${i}">Ajouter</button></div>`).join("") + `</div>`;
+  }catch(e){ $("#etf-etat").textContent = "Erreur : "+e.message; }
+}
+$("#etf-go").addEventListener("click", chercherEtf);
+$("#etf-q").addEventListener("keydown", e=>{ if(e.key==="Enter") chercherEtf(); });
+
+/* ------------------------------------------------------------ import iEstims */
+$("#imp-go").addEventListener("click", async ()=>{
+  const fichiers = [...$("#imp-fichier").files];
+  if(!fichiers.length){ $("#imp-etat").textContent = "Choisis le ou les CSV exportés depuis iEstims."; return; }
+  const b = $("#imp-go"); b.disabled = true; b.textContent = "Import…";
+  const bilan = [];
+  for(const f of fichiers){
+    try{
+      const contenu = await f.text();
+      const r = await api("/api/import/iestims", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({contenu})});
+      let ligne = `${f.name} — ${r.genre} : ${r.lignes} ligne(s), ${r.nouvelles} nouvelle(s), `
+        + `${r.majes} mise(s) à jour, ${eur2(r.valeur)} au total.`;
+      if(r.genre === "cartes")
+        ligne += ` ${r.liees} carte(s) cotée(s) automatiquement via Cardmarket`
+          + (r.aLier ? `, ${r.aLier} à lier à la main (prix iEstims figé en attendant).` : ".");
+      bilan.push(ligne);
+    }catch(e){ bilan.push(`${f.name} — échec : ${e.message}`); }
+  }
+  $("#imp-etat").innerHTML = bilan.map(ech).join("<br>");
+  $("#imp-fichier").value = "";
+  b.disabled = false; b.textContent = "Importer";
+  await recharger();
+  toast("Import terminé");
+});
+
+/* ------------------------------------------------------------ comptes */
+function rendreListeComptes(){
+  $("#cpt-liste").innerHTML = !P.comptes.length
+    ? `<div class="vide">Aucun compte pour l'instant.</div>`
+    : `<div class="liste">` + P.comptes.map(c=>`
+        <div class="lr"><div class="lr-txt"><b>${ech(c.nom)}</b>
+            <span>${ech((CAT[c.categorie]||CAT.autre).label)}${c.institution?" · "+ech(c.institution):""} · ${c.lignes.length} ligne(s)</span></div>
+          <div class="lr-prix">${eur(c.valeur)}</div>
+          <button class="btn btn-2 btn-s" data-suppr-cpt="${c.id}">Supprimer</button></div>`).join("") + `</div>`;
+}
+$("#cpt-go").addEventListener("click", async ()=>{
+  const nom = $("#cpt-nom").value.trim();
+  if(!nom){ $("#cpt-etat").textContent = "Donne un nom au compte."; return; }
+  try{
+    await api("/api/compte", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({nom, categorie:$("#cpt-cat").value,
+        institution:$("#cpt-inst").value.trim()||null})});
+    $("#cpt-nom").value = $("#cpt-inst").value = "";
+    $("#cpt-etat").textContent = "";
+    await recharger(); toast(`Compte « ${nom} » créé`);
+  }catch(e){ $("#cpt-etat").textContent = "Erreur : "+e.message; }
+});
 
 /* ------------------------------------------------------------ modale */
 async function ouvrirModale(id){
@@ -472,6 +715,32 @@ async function rattacher(rid){
     await recharger();
   }catch(e){ toast("Échec : "+e.message, "ko"); }
 }
+
+/* ------------------------------------------------------------ compte */
+async function chargerCompte(){
+  try{
+    const j = await api("/api/etat-connexion");
+    $("#qui").textContent = j.utilisateur || "—";
+  }catch(e){ /* la garde redirige déjà si la session est tombée */ }
+}
+$("#deconnexion").addEventListener("click", async ()=>{
+  await fetch("/api/deconnexion", {method:"POST"});
+  location.href = "/connexion";
+});
+$("#go-mdp").addEventListener("click", async ()=>{
+  const actuel = $("#mdp-actuel").value, nouveau = $("#mdp-nouveau").value;
+  if(!actuel || !nouveau){ $("#etat-mdp").textContent = "Remplis les deux champs."; return; }
+  try{
+    await api("/api/motdepasse", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({actuel, nouveau}),
+    });
+    $("#mdp-actuel").value = $("#mdp-nouveau").value = "";
+    $("#etat-mdp").textContent = "Mot de passe changé.";
+    toast("Mot de passe changé");
+  }catch(e){ $("#etat-mdp").textContent = "Erreur : "+e.message; }
+});
 
 /* ------------------------------------------------------------ 3D + fond */
 const doux = !matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -551,4 +820,6 @@ zg.addEventListener("pointerleave", ()=>{
 rendrePeriodes();
 recharger();
 chargerBanques();
+chargerCompte();
+chargerEtf();
 setInterval(recharger, 60000);   // le backend collecte, le front se resynchronise

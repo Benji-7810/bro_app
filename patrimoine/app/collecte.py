@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import os
 import time
+import unicodedata
 import urllib.parse
 import uuid
 from datetime import datetime
@@ -52,17 +53,39 @@ async def cours_crypto():
             d = data.get(l["code"])
             if not d or not d.get("eur"):
                 continue
-            prix = float(d["eur"])
-            # Première fois : on déduit la quantité de la valorisation de départ.
-            # Elle sera écrasée par la vraie quantité dès que Kraken répond.
-            q = l["quantite"]
-            if q in (None, 0) or (q == 1 and l["prix_unite"] > 100):
-                q = round(l["prix_unite"] / prix, 10)
-            db.maj_cours(l["id"], prix, q)
+            # La quantité appartient à l'utilisateur (ou à Kraken) : on ne
+            # touche qu'au cours.
+            db.maj_cours(l["id"], float(d["eur"]))
             n += 1
         db.journaliser("coingecko", "ok", f"{n} cours")
     except Exception as e:
         db.journaliser("coingecko", "erreur", e)
+
+
+async def chercher_crypto(terme, limite=14):
+    """Recherche CoinGecko + cours en euros des résultats. Sans clé."""
+    async with httpx.AsyncClient(timeout=TIMEOUT) as c:
+        r = await c.get(f"{CG}/search", params={"query": terme})
+        r.raise_for_status()
+        pieces = (r.json().get("coins") or [])[:limite]
+        if not pieces:
+            return []
+        ids = ",".join({p["id"] for p in pieces})
+        prix = {}
+        try:
+            rp = await c.get(f"{CG}/simple/price",
+                             params={"ids": ids, "vs_currencies": "eur"})
+            rp.raise_for_status()
+            prix = rp.json()
+        except Exception:
+            pass          # la recherche reste utile sans les cours
+    return [{
+        "id": p["id"],
+        "nom": p.get("name") or p["id"],
+        "symbole": (p.get("symbol") or "").upper(),
+        "image": p.get("thumb") or p.get("large"),
+        "prix": (prix.get(p["id"]) or {}).get("eur"),
+    } for p in pieces]
 
 
 KRAKEN = "https://api.kraken.com"
@@ -134,11 +157,37 @@ _UA_NAV = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
            "(KHTML, like Gecko) Chrome/120 Safari/537.36")
 
 
+# frankfurter.app redirige (301) vers ce domaine depuis 2026 : httpx ne
+# suit pas les redirections par défaut, d'où follow_redirects partout.
+FX = "https://api.frankfurter.dev/v1"
+
+
+async def _taux_vers_eur(client, devise):
+    """1 unité de `devise` vaut combien d'euros ? Yahoo cote les ETF
+    américains en USD et les trackers londoniens en pence : sans ça, un
+    ETF à 500 $ serait compté comme 500 €."""
+    d = (devise or "EUR").upper()
+    if d == "EUR":
+        return 1.0
+    if d == "GBP" or devise == "GBp":
+        base, div = "GBP", (100 if devise == "GBp" else 1)
+    else:
+        base, div = d, 1
+    try:
+        fx = await client.get(f"{FX}/latest", params={"from": base, "to": "EUR"},
+                              follow_redirects=True)
+        fx.raise_for_status()
+        return float(fx.json()["rates"]["EUR"]) / div
+    except Exception:
+        return None
+
+
 async def cours_bourse():
     lignes = [l for l in db.lister_lignes() if l["source"] == "yfinance" and l["code"]]
     if not lignes:
         return
     n, echecs = 0, []
+    taux = {"EUR": 1.0}
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": _UA_NAV}) as c:
             for l in lignes:
@@ -159,11 +208,13 @@ async def cours_bourse():
                     if not prix:
                         echecs.append(l["code"])
                         continue
-                    prix = float(prix)
-                    q = l["quantite"]
-                    if q in (None, 0) or (q == 1 and l["prix_unite"] > prix * 1.5):
-                        q = round(l["prix_unite"] / prix, 6)
-                    db.maj_cours(l["id"], prix, q)
+                    dev = meta.get("currency") or "EUR"
+                    if dev not in taux:
+                        taux[dev] = await _taux_vers_eur(c, dev)
+                    if taux[dev] is None:
+                        echecs.append(f"{l['code']}: taux {dev} indisponible")
+                        continue
+                    db.maj_cours(l["id"], round(float(prix) * taux[dev], 4))
                     n += 1
                 except Exception as e:
                     echecs.append(f"{l['code']}: {e}")
@@ -171,6 +222,52 @@ async def cours_bourse():
                        f"{n} cours" + (f", échecs {echecs}" if echecs else ""))
     except Exception as e:
         db.journaliser("yfinance", "erreur", e)
+
+
+YF_SEARCH = "https://query1.finance.yahoo.com/v1/finance/search"
+
+
+async def chercher_bourse(terme, limite=14):
+    """Recherche Yahoo : ETF, actions, indices. Renvoie le code à coller
+    dans la ligne, plus le dernier cours si Yahoo le donne."""
+    async with httpx.AsyncClient(timeout=TIMEOUT, headers={"User-Agent": _UA_NAV}) as c:
+        r = await c.get(YF_SEARCH, params={"q": terme, "quotesCount": limite,
+                                           "newsCount": 0, "listsCount": 0})
+        r.raise_for_status()
+        quotes = [q for q in (r.json().get("quotes") or [])
+                  if q.get("symbol") and q.get("quoteType") in
+                  ("ETF", "EQUITY", "MUTUALFUND", "INDEX")][:limite]
+        sortie = []
+        for q in quotes:
+            sortie.append({
+                "id": q["symbol"],
+                "nom": q.get("longname") or q.get("shortname") or q["symbol"],
+                "symbole": q["symbol"],
+                "place": q.get("exchDisp") or "",
+                "genre": q.get("typeDisp") or q.get("quoteType") or "",
+                "prix": None,
+                "devise": None,
+            })
+        # Le cours n'est pas dans la recherche : un appel chart par résultat
+        # coûterait cher, on ne le fait que pour les premiers.
+        taux = {"EUR": 1.0}
+        for s in sortie[:6]:
+            try:
+                rc = await c.get(YF_CHART.format(s["id"]),
+                                 params={"interval": "1d", "range": "5d"})
+                meta = ((rc.json().get("chart") or {}).get("result") or [{}])[0].get("meta") or {}
+                prix, dev = meta.get("regularMarketPrice"), meta.get("currency") or "EUR"
+                if not prix:
+                    continue
+                if dev not in taux:
+                    taux[dev] = await _taux_vers_eur(c, dev)
+                if taux[dev] is None:
+                    continue
+                s["prix"] = round(float(prix) * taux[dev], 4)
+                s["devise"] = dev
+            except Exception:
+                pass
+    return sortie
 
 
 # =====================================================================
@@ -253,6 +350,131 @@ async def cours_cartes():
 
 
 # =====================================================================
+#  CARTES (bis) — TCGdex : catalogue FRANÇAIS + prix Cardmarket en euros
+# ---------------------------------------------------------------------
+#  Gratuit, sans clé. C'est la seule source qui connaît les cartes sous
+#  leur nom français ET porte les prix Cardmarket : PokemonTCG.io est
+#  anglophone, ce qui rend impossible la correspondance depuis un export
+#  français (« Méga-Zeraora-ex » vs « Mega-zeraora ex »).
+#
+#  On ne fait donc jamais de correspondance par nom : la série et le
+#  numéro de l'export suffisent et sont sans ambiguïté (me05 + 098).
+# =====================================================================
+TCGDEX = "https://api.tcgdex.net/v2/fr"
+_sets_tcgdex = None
+
+
+def _sans_accents(s):
+    return "".join(c for c in unicodedata.normalize("NFD", (s or "").lower())
+                   if unicodedata.category(c) != "Mn").strip()
+
+
+async def _sets_fr(client):
+    """Nom de série française -> identifiant de set. Mis en cache : le
+    catalogue ne bouge qu'à la sortie d'une extension."""
+    global _sets_tcgdex
+    if _sets_tcgdex is None:
+        r = await client.get(f"{TCGDEX}/sets")
+        r.raise_for_status()
+        _sets_tcgdex = {_sans_accents(s["name"]): s["id"]
+                        for s in r.json() if s.get("name")}
+    return _sets_tcgdex
+
+
+def _numeros(numero):
+    """« 098/084 » -> ['098', '98'] : TCGdex zéro-remplit, pas iEstims."""
+    brut = str(numero or "").split("/")[0].strip()
+    if not brut:
+        return []
+    formes = [brut]
+    if brut.lstrip("0") and brut.lstrip("0") != brut:
+        formes.append(brut.lstrip("0"))
+    if brut.isdigit():
+        formes.append(brut.zfill(3))
+    return list(dict.fromkeys(formes))
+
+
+async def resoudre_carte(client, serie, numero):
+    """Série + numéro -> identifiant TCGdex, ou None si introuvable."""
+    sets = await _sets_fr(client)
+    sid = sets.get(_sans_accents(serie))
+    if not sid:
+        return None
+    r = await client.get(f"{TCGDEX}/sets/{sid}")
+    if r.status_code != 200:
+        return None
+    cartes = r.json().get("cards") or []
+    voulus = set(_numeros(numero))
+    for c in cartes:
+        if str(c.get("localId", "")).strip() in voulus:
+            return c["id"]
+    return None
+
+
+def _prix_cardmarket(detail):
+    """Cote en euros : tendance de préférence, sinon moyenne 7 jours."""
+    for v in detail.get("variants_detailed") or []:
+        p = (v.get("pricing") or {}).get("cardmarket") or {}
+        for cle in ("trend", "avg7", "avg", "avg30"):
+            if p.get(cle):
+                return float(p[cle])
+    return None
+
+
+async def cours_tcgdex():
+    lignes = [l for l in db.lister_lignes() if l["source"] == "tcgdex" and l["code"]]
+    if not lignes:
+        return
+    n, echecs = 0, []
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as c:
+            for l in lignes:
+                try:
+                    r = await c.get(f"{TCGDEX}/cards/{l['code']}")
+                    if r.status_code != 200:
+                        echecs.append(l["code"])
+                        continue
+                    prix = _prix_cardmarket(r.json())
+                    if prix is None:
+                        echecs.append(f"{l['code']}: pas de cote Cardmarket")
+                        continue
+                    db.maj_cours(l["id"], prix)
+                    n += 1
+                except Exception as e:
+                    echecs.append(f"{l['code']}: {e}")
+        db.journaliser("tcgdex", "ok" if n else "erreur",
+                       f"{n} cotes" + (f", échecs {echecs}" if echecs else ""))
+    except Exception as e:
+        db.journaliser("tcgdex", "erreur", e)
+
+
+async def chercher_tcgdex(nom, limite=14):
+    """Recherche par nom français, pour l'ajout manuel depuis l'interface."""
+    async with httpx.AsyncClient(timeout=TIMEOUT) as c:
+        r = await c.get(f"{TCGDEX}/cards", params={"name": nom})
+        r.raise_for_status()
+        trouves = (r.json() or [])[:limite]
+        sortie = []
+        for x in trouves:
+            det = {}
+            try:
+                d = await c.get(f"{TCGDEX}/cards/{x['id']}")
+                det = d.json() if d.status_code == 200 else {}
+            except Exception:
+                pass
+            sortie.append({
+                "id": x["id"],
+                "nom": x.get("name") or x["id"],
+                "set": (det.get("set") or {}).get("name", ""),
+                "numero": x.get("localId", ""),
+                "image": (x.get("image") or det.get("image") or "") and
+                         f"{x.get('image') or det.get('image')}/high.webp",
+                "prix": _prix_cardmarket(det),
+            })
+    return sortie
+
+
+# =====================================================================
 #  SCELLÉ — TCG API (tcgapi.dev), agrège TCGplayer & Cardmarket
 # ---------------------------------------------------------------------
 #  Remplace l'ancienne API Cardmarket (OAuth 1.0a). TCG API agrège les
@@ -260,7 +482,7 @@ async def cours_cartes():
 #  explicitement le scellé Pokémon (booster boxes, ETB, blisters,
 #  coffrets). Gratuit : 100 requêtes/jour avec une clé sur tcgapi.dev.
 #  Plus de signature : une simple clé dans l'en-tête X-API-Key.
-#  Prix rendus en USD, convertis en EUR (taux frankfurter.app).
+#  Prix rendus en USD, convertis en EUR (taux frankfurter).
 # =====================================================================
 TCGAPI = "https://api.tcgapi.dev/v1"
 
@@ -271,11 +493,7 @@ def _entetes_tcgapi():
 
 
 async def _usd_vers_eur(client):
-    try:
-        fx = await client.get("https://api.frankfurter.app/latest?from=USD&to=EUR")
-        return float(fx.json()["rates"]["EUR"])
-    except Exception:
-        return 0.92
+    return await _taux_vers_eur(client, "USD") or 0.92
 
 
 def _prix_tcgapi(obj):
@@ -499,12 +717,7 @@ async def cours_pricecharting():
     n = 0
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as c:
-            taux = 0.92
-            try:
-                fx = await c.get("https://api.frankfurter.app/latest?from=USD&to=EUR")
-                taux = fx.json()["rates"]["EUR"]
-            except Exception:
-                pass
+            taux = await _usd_vers_eur(c)
             for l in lignes:
                 r = await c.get("https://www.pricecharting.com/api/product",
                                 params={"t": jeton, "id": l["code"]})
@@ -634,6 +847,7 @@ async def collecte_bourse():
 
 async def collecte_cartes():
     await cours_cartes()
+    await cours_tcgdex()
     await cours_scelle()
     await cours_pricecharting()
     db.enregistrer_releve()
