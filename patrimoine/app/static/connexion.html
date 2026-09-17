@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORGE — Connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --white: #FFFFFF;
+      --pink: #FF3B9A;
+      --text-gray: #A0A0A8;
+      --text-muted: #55555F;
+      --border-line: rgba(255, 255, 255, 0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .carte { width: 100%; max-width: 380px; }
+    .marque {
+      font-family: 'Anton', sans-serif;
+      font-size: 3.4rem;
+      letter-spacing: 0.15em;
+      line-height: 1;
+      text-align: center;
+    }
+    .marque span { color: var(--pink); }
+    .sous {
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+    .intro {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-gray);
+      text-align: center;
+      margin-top: 28px;
+    }
+    form { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+    label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+    }
+    input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border-line);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--pink); }
+    button {
+      margin-top: 6px;
+      background: var(--pink);
+      color: var(--bg);
+      border: none;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.45; cursor: default; }
+    .erreur {
+      display: none;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--pink);
+      border-left: 2px solid var(--pink);
+      padding-left: 12px;
+    }
+    .erreur.visible { display: block; }
+    .note {
+      margin-top: 26px;
+      text-align: center;
+      font-size: 0.7rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="carte">
+    <h1 class="marque">FOR<span>G</span>E</h1>
+    <p class="sous" id="sous">Personal Operating System</p>
+
+    <p class="intro" id="intro" hidden></p>
+
+    <form id="form" hidden>
+      <div>
+        <label for="utilisateur">Identifiant</label>
+        <input id="utilisateur" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </div>
+      <div>
+        <label for="motdepasse">Mot de passe</label>
+        <input id="motdepasse" type="password" required>
+      </div>
+      <div id="bloc-confirmation" hidden>
+        <label for="confirmation">Confirme le mot de passe</label>
+        <input id="confirmation" type="password">
+      </div>
+      <p class="erreur" id="erreur"></p>
+      <button type="submit" id="valider">Entrer</button>
+    </form>
+
+    <p class="note" id="note" hidden></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const intro = document.getElementById('intro');
+    const note = document.getElementById('note');
+    const erreur = document.getElementById('erreur');
+    const valider = document.getElementById('valider');
+    const blocConfirmation = document.getElementById('bloc-confirmation');
+    const champUtilisateur = document.getElementById('utilisateur');
+    const champMotdepasse = document.getElementById('motdepasse');
+    const champConfirmation = document.getElementById('confirmation');
+
+    let premiereFois = false;
+
+    function montrerErreur(message) {
+      erreur.textContent = message;
+      erreur.classList.add('visible');
+    }
+
+    (async () => {
+      try {
+        const etat = await (await fetch('/api/etat-connexion')).json();
+        premiereFois = !etat.configure;
+      } catch {
+        montrerErreur("Le serveur ne répond pas. Vérifie qu'il est bien lancé.");
+        form.hidden = false;
+        valider.disabled = true;
+        return;
+      }
+
+      if (premiereFois) {
+        document.getElementById('sous').textContent = 'Première connexion';
+        intro.textContent = "Choisis l'identifiant et le mot de passe qui protégeront ton tableau de bord. Ils ne sortent jamais de cette machine.";
+        blocConfirmation.hidden = false;
+        champConfirmation.required = true;
+        champUtilisateur.autocomplete = 'username';
+        champMotdepasse.autocomplete = 'new-password';
+        champConfirmation.autocomplete = 'new-password';
+        valider.textContent = 'Créer le compte';
+        note.textContent = '8 caractères minimum. Le mot de passe est stocké chiffré, il ne pourra pas être retrouvé en clair.';
+      } else {
+        intro.textContent = 'Connecte-toi pour accéder à ton patrimoine.';
+        champMotdepasse.autocomplete = 'current-password';
+        note.textContent = 'Mot de passe oublié ? Supprime le fichier data.db pour repartir de zéro (tu perdras ton historique).';
+      }
+      intro.hidden = false;
+      note.hidden = false;
+      form.hidden = false;
+      champUtilisateur.focus();
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      erreur.classList.remove('visible');
+
+      if (premiereFois && champMotdepasse.value !== champConfirmation.value) {
+        montrerErreur('Les deux mots de passe ne correspondent pas.');
+        return;
+      }
+
+      valider.disabled = true;
+      const libelle = valider.textContent;
+      valider.textContent = 'Un instant…';
+
+      try {
+        const r = await fetch('/api/connexion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            utilisateur: champUtilisateur.value,
+            motdepasse: champMotdepasse.value,
+          }),
+        });
+        if (r.ok) {
+          location.href = '/';
+          return;
+        }
+        const corps = await r.json().catch(() => ({}));
+        montrerErreur(corps.detail || 'Connexion impossible.');
+      } catch {
+        montrerErreur('Le serveur ne répond pas.');
+      }
+
+      valider.disabled = false;
+      valider.textContent = libelle;
+      champMotdepasse.value = '';
+      if (premiereFois) champConfirmation.value = '';
+      champMotdepasse.focus();
+    });
+  </script>
+
+</body>
+</html>

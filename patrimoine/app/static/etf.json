@@ -1,0 +1,762 @@
+[
+ {
+  "code": "PAASI.PA",
+  "nom": "Amundi PEA Asie Émergente (MSCI Emerging Asia) Screened UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Asie",
+  "pea": true
+ },
+ {
+  "code": "CEU.PA",
+  "nom": "Amundi MSCI Europe ESG Broad Transition - UCITS ETF DR - EUR (C)",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Europe",
+  "pea": true
+ },
+ {
+  "code": "PCEU.PA",
+  "nom": "Amundi PEA MSCI Europe UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Europe",
+  "pea": true
+ },
+ {
+  "code": "CACC.PA",
+  "nom": "Amundi CAC 40 UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "France",
+  "pea": true
+ },
+ {
+  "code": "C40.PA",
+  "nom": "Amundi Index Solutions - AMUNDI CAC 40 ESG UCITS ETF DR - EUR (C)",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "France",
+  "pea": true
+ },
+ {
+  "code": "PMEH.PA",
+  "nom": "Amundi PEA Immobilier Europe (FTSE EPRA/NAREIT) UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Immobilier",
+  "pea": true
+ },
+ {
+  "code": "PJPN.PA",
+  "nom": "Lyxor PEA Japon (TOPIX) UCITS ETF",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Japon",
+  "pea": true
+ },
+ {
+  "code": "LVC.PA",
+  "nom": "Amundi CAC 40 Daily (2x) Leveraged UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Levier",
+  "pea": true
+ },
+ {
+  "code": "CL2.PA",
+  "nom": "Amundi MSCI USA Daily (2x) Leveraged UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Levier",
+  "pea": true
+ },
+ {
+  "code": "CW8.PA",
+  "nom": "Amundi Index Solutions - Amundi MSCI World Swap UCITS ETF EUR Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Monde",
+  "pea": true
+ },
+ {
+  "code": "EWLD.PA",
+  "nom": "Amundi Index Solutions - Amundi MSCI World Swap UCITS ETF EUR Dist",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Monde",
+  "pea": true
+ },
+ {
+  "code": "WPEA.PA",
+  "nom": "iShares MSCI World Swap PEA UCITS ETF",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Monde",
+  "pea": true
+ },
+ {
+  "code": "PUST.PA",
+  "nom": "Amundi PEA Nasdaq-100 UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Nasdaq",
+  "pea": true
+ },
+ {
+  "code": "PANX.PA",
+  "nom": "Amundi PEA US Tech Screened UCITS ETF - Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Nasdaq",
+  "pea": true
+ },
+ {
+  "code": "RS2K.PA",
+  "nom": "Amundi Index Solutions - Amundi Russell 2000 ETF-C EUR",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Small caps",
+  "pea": true
+ },
+ {
+  "code": "PAEEM.PA",
+  "nom": "Amundi PEA Émergent (MSCI Emerging) ESG Transition UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Émergents",
+  "pea": true
+ },
+ {
+  "code": "PE500.PA",
+  "nom": "Amundi PEA S&P 500 Screened UCITS ETF - Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "États-Unis",
+  "pea": true
+ },
+ {
+  "code": "PSP5.PA",
+  "nom": "Amundi PEA S&P 500 UCITS ETF Acc",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "États-Unis",
+  "pea": true
+ },
+ {
+  "code": "ESE.PA",
+  "nom": "BNP Paribas Easy S&P 500 UCITS ETF EUR C",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "États-Unis",
+  "pea": true
+ },
+ {
+  "code": "ESEH.PA",
+  "nom": "BNP Paribas Easy S&P 500 UCITS ETF EUR H",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "États-Unis",
+  "pea": true
+ },
+ {
+  "code": "SLV",
+  "nom": "iShares Silver Trust",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Argent",
+  "pea": false
+ },
+ {
+  "code": "FBTC",
+  "nom": "Fidelity Wise Origin Bitcoin Fund",
+  "devise": "USD",
+  "place": "Cboe US",
+  "groupe": "Crypto",
+  "pea": false
+ },
+ {
+  "code": "IBIT",
+  "nom": "iShares Bitcoin Trust ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Crypto",
+  "pea": false
+ },
+ {
+  "code": "SCHD",
+  "nom": "Schwab U.S. Dividend Equity ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Dividendes",
+  "pea": false
+ },
+ {
+  "code": "VIG",
+  "nom": "Vanguard Dividend Appreciation Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Dividendes",
+  "pea": false
+ },
+ {
+  "code": "VYM",
+  "nom": "Vanguard High Dividend Yield Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Dividendes",
+  "pea": false
+ },
+ {
+  "code": "DGRO",
+  "nom": "iShares Core Dividend Growth ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Dividendes",
+  "pea": false
+ },
+ {
+  "code": "VEUR.AS",
+  "nom": "Vanguard FTSE Developed Europe UCITS ETF",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Europe",
+  "pea": false
+ },
+ {
+  "code": "IMAE.AS",
+  "nom": "iShares Core MSCI Europe UCITS ETF EUR (Acc)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Europe",
+  "pea": false
+ },
+ {
+  "code": "SXR7.DE",
+  "nom": "iShares VII PLC -iShares Core MSCI EMU UCITS ETF EUR (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Europe",
+  "pea": false
+ },
+ {
+  "code": "VNQ",
+  "nom": "Vanguard Real Estate Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Immobilier",
+  "pea": false
+ },
+ {
+  "code": "IWDP.AS",
+  "nom": "iShares Developed Markets Property Yield UCITS ETF USD (Dist)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Immobilier",
+  "pea": false
+ },
+ {
+  "code": "SWRD.MI",
+  "nom": "State Street SPDR MSCI World UCITS ETF",
+  "devise": "EUR",
+  "place": "Milan",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "VWRL.AS",
+  "nom": "Vanguard FTSE All-World UCITS ETF",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "VWCE.DE",
+  "nom": "Vanguard FTSE All-World UCITS ETF USD Accumulation",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "VEA",
+  "nom": "Vanguard FTSE Developed Markets Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "VXUS",
+  "nom": "Vanguard Total International Stock Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "VT",
+  "nom": "Vanguard Total World Stock Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "XDWD.DE",
+  "nom": "Xtrackers MSCI World UCITS ETF 1C",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "IWDA.AS",
+  "nom": "iShares Core MSCI World UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "EUNL.DE",
+  "nom": "iShares Core MSCI World UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "IUSQ.DE",
+  "nom": "iShares MSCI All Country World UCITS ETF USD Acc",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "EFA",
+  "nom": "iShares MSCI EAFE ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Monde",
+  "pea": false
+ },
+ {
+  "code": "EQQQ.PA",
+  "nom": "Invesco EQQQ NASDAQ-100 UCITS ETF",
+  "devise": "EUR",
+  "place": "Paris",
+  "groupe": "Nasdaq",
+  "pea": false
+ },
+ {
+  "code": "QQQM",
+  "nom": "Invesco NASDAQ 100 ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Nasdaq",
+  "pea": false
+ },
+ {
+  "code": "QQQ",
+  "nom": "Invesco QQQ Trust",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Nasdaq",
+  "pea": false
+ },
+ {
+  "code": "SXRV.DE",
+  "nom": "iShares NASDAQ 100 UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Nasdaq",
+  "pea": false
+ },
+ {
+  "code": "VAGF.DE",
+  "nom": "Vanguard Global Aggregate Bond UCITS ETF EUR Hedged Accumulation",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "BND",
+  "nom": "Vanguard Total Bond Market Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "TLT",
+  "nom": "iShares 20+ Year Treasury Bond ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "IEF",
+  "nom": "iShares 7-10 Year Treasury Bond ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "AGGH.MI",
+  "nom": "iShares Core Global Aggregate Bond UCITS ETF EUR Hedged (Acc)",
+  "devise": "EUR",
+  "place": "Milan",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "AGG",
+  "nom": "iShares Core U.S. Aggregate Bond ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "HYG",
+  "nom": "iShares iBoxx $ High Yield Corporate Bond ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "LQD",
+  "nom": "iShares iBoxx $ Investment Grade Corporate Bond ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "IEAG.AS",
+  "nom": "iShares € Aggregate Bond ESG SRI UCITS ETF EUR (Dist)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Obligations",
+  "pea": false
+ },
+ {
+  "code": "GLD",
+  "nom": "SPDR Gold Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Or",
+  "pea": false
+ },
+ {
+  "code": "PHAU.L",
+  "nom": "WisdomTree Physical Gold",
+  "devise": "USD",
+  "place": "LSE",
+  "groupe": "Or",
+  "pea": false
+ },
+ {
+  "code": "IAU",
+  "nom": "iShares Gold Trust",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Or",
+  "pea": false
+ },
+ {
+  "code": "SGLN.L",
+  "nom": "iShares Physical Gold ETC",
+  "devise": "GBp",
+  "place": "LSE",
+  "groupe": "Or",
+  "pea": false
+ },
+ {
+  "code": "XLY",
+  "nom": "State Street Consumer Discretionary Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XLE",
+  "nom": "State Street Energy Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XLF",
+  "nom": "State Street Financial Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XLV",
+  "nom": "State Street Health Care Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XLI",
+  "nom": "State Street Industrial Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XLK",
+  "nom": "State Street Technology Select Sector SPDR ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "SMH",
+  "nom": "VanEck Semiconductor ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "VGT",
+  "nom": "Vanguard Information Technology Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "XAIX.DE",
+  "nom": "Xtrackers Artificial Intelligence & Big Data UCITS ETF 1C",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "L0CK.DE",
+  "nom": "iShares Digital Security UCITS ETF USD Acc",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "ESIH.DE",
+  "nom": "iShares MSCI Europe Health Care Sector UCITS ETF",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "QDVE.DE",
+  "nom": "iShares S&P 500 Information Technology Sector UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "SOXX",
+  "nom": "iShares Semiconductor ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Sectoriel",
+  "pea": false
+ },
+ {
+  "code": "AVUV",
+  "nom": "Avantis US Small Cap Value ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Small caps",
+  "pea": false
+ },
+ {
+  "code": "VBR",
+  "nom": "Vanguard Morningstar Small-Cap Value ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Small caps",
+  "pea": false
+ },
+ {
+  "code": "IUSN.DE",
+  "nom": "iShares MSCI World Small Cap UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Small caps",
+  "pea": false
+ },
+ {
+  "code": "IWM",
+  "nom": "iShares Russell 2000 ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Small caps",
+  "pea": false
+ },
+ {
+  "code": "ARKK",
+  "nom": "ARK Innovation ETF",
+  "devise": "USD",
+  "place": "Cboe US",
+  "groupe": "Thématique",
+  "pea": false
+ },
+ {
+  "code": "MOAT",
+  "nom": "VanEck Morningstar Wide Moat ETF",
+  "devise": "USD",
+  "place": "Cboe US",
+  "groupe": "Thématique",
+  "pea": false
+ },
+ {
+  "code": "ICLN",
+  "nom": "iShares Global Clean Energy ETF",
+  "devise": "USD",
+  "place": "NasdaqGM",
+  "groupe": "Thématique",
+  "pea": false
+ },
+ {
+  "code": "USMV",
+  "nom": "iShares MSCI USA Min Vol Factor ETF",
+  "devise": "USD",
+  "place": "Cboe US",
+  "groupe": "Thématique",
+  "pea": false
+ },
+ {
+  "code": "QUAL",
+  "nom": "iShares MSCI USA Quality Factor ETF",
+  "devise": "USD",
+  "place": "Cboe US",
+  "groupe": "Thématique",
+  "pea": false
+ },
+ {
+  "code": "VWO",
+  "nom": "Vanguard FTSE Emerging Markets Index Fund ETF Shares",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Émergents",
+  "pea": false
+ },
+ {
+  "code": "EMIM.AS",
+  "nom": "iShares Core MSCI EM IMI UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "Émergents",
+  "pea": false
+ },
+ {
+  "code": "IS3N.DE",
+  "nom": "iShares Core MSCI EM IMI UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "Émergents",
+  "pea": false
+ },
+ {
+  "code": "EEM",
+  "nom": "iShares MSCI Emerging Markets ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "Émergents",
+  "pea": false
+ },
+ {
+  "code": "RSP",
+  "nom": "Invesco S&P 500 Equal Weight ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "DIA",
+  "nom": "State Street SPDR Dow Jones Industrial Average ETF Trust",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "SPY",
+  "nom": "State Street SPDR S&P 500 ETF Trust",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "VTI",
+  "nom": "Vanguard Morningstar Total Stock Market ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "VOO",
+  "nom": "Vanguard S&P 500 ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "VUSA.AS",
+  "nom": "Vanguard S&P 500 UCITS ETF",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "IVV",
+  "nom": "iShares Core S&P 500 ETF",
+  "devise": "USD",
+  "place": "NYSEArca",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "SXR8.DE",
+  "nom": "iShares Core S&P 500 UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "XETRA",
+  "groupe": "États-Unis",
+  "pea": false
+ },
+ {
+  "code": "CSPX.AS",
+  "nom": "iShares Core S&P 500 UCITS ETF USD (Acc)",
+  "devise": "EUR",
+  "place": "Amsterdam",
+  "groupe": "États-Unis",
+  "pea": false
+ }
+]
